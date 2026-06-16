@@ -1,0 +1,532 @@
+
+<style>
+:root {
+  --peach:#FFD8C2;--peach-d:#E8956A;--peach-t:#7A3B1E;
+  --mint:#C8EBE0;--mint-d:#5BB89A;--mint-t:#1A5C47;
+  --lav:#DDD4F5;--lav-d:#8B75D9;--lav-t:#3D2678;
+  --sky:#C8E6F5;--sky-d:#5BA8D4;--sky-t:#1A4A6A;
+  --but:#FFF0C2;--but-d:#D4A820;--but-t:#5C4200;
+  --rose:#F5D4E0;--rose-d:#C96B8A;--rose-t:#6A1A35;
+  --cr:16px; --sh:0 2px 12px rgba(0,0,0,0.07);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+.app{padding:1rem .75rem 2rem;max-width:680px;margin:0 auto;font-family:var(--font-sans);}
+/* 홈 */
+.home-title{font-size:18px;font-weight:500;color:var(--color-text-primary);text-align:center;margin-bottom:4px;}
+.home-sub{font-size:12px;color:var(--color-text-tertiary);text-align:center;margin-bottom:1.25rem;}
+.lesson-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+.lc{border-radius:var(--cr);padding:1rem .5rem;text-align:center;cursor:pointer;transition:transform .15s,box-shadow .15s;border:2px solid transparent;}
+.lc:hover{transform:translateY(-2px);box-shadow:var(--sh);}
+.lc0{background:var(--peach)}.lc1{background:var(--mint)}.lc2{background:var(--lav)}.lc3{background:var(--sky)}.lc4{background:var(--but)}.lc5{background:var(--rose)}
+.lnum{font-size:22px;font-weight:500;margin-bottom:4px;}
+.lc0 .lnum{color:var(--peach-t)}.lc1 .lnum{color:var(--mint-t)}.lc2 .lnum{color:var(--lav-t)}.lc3 .lnum{color:var(--sky-t)}.lc4 .lnum{color:var(--but-t)}.lc5 .lnum{color:var(--rose-t)}
+.lname{font-size:11px;color:var(--color-text-secondary);line-height:1.3;}
+/* 단원 헤더 */
+.lhdr{display:flex;align-items:center;gap:10px;margin-bottom:1rem;}
+.back-btn{padding:6px 12px;border-radius:20px;border:.5px solid var(--color-border-secondary);background:var(--color-background-primary);color:var(--color-text-secondary);font-size:12px;cursor:pointer;white-space:nowrap;}
+.lbadge{padding:6px 16px;border-radius:20px;font-size:13px;font-weight:500;}
+.lsub{font-size:12px;color:var(--color-text-tertiary);}
+/* 모드 탭 */
+.mtabs{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:1.25rem;}
+.mtab{padding:10px 4px;border-radius:12px;border:2px solid transparent;background:var(--color-background-secondary);color:var(--color-text-secondary);font-size:12px;cursor:pointer;text-align:center;transition:all .18s;line-height:1.4;}
+.mtab .ti{font-size:18px;display:block;margin-bottom:3px;}
+.mtab:hover{background:var(--color-background-primary);box-shadow:var(--sh);}
+.u0 .mtab.on{background:var(--peach);border-color:var(--peach-d);color:var(--peach-t);}
+.u1 .mtab.on{background:var(--mint);border-color:var(--mint-d);color:var(--mint-t);}
+.u2 .mtab.on{background:var(--lav);border-color:var(--lav-d);color:var(--lav-t);}
+.u3 .mtab.on{background:var(--sky);border-color:var(--sky-d);color:var(--sky-t);}
+.u4 .mtab.on{background:var(--but);border-color:var(--but-d);color:var(--but-t);}
+.u5 .mtab.on{background:var(--rose);border-color:var(--rose-d);color:var(--rose-t);}
+/* 진행바 */
+.pbar{height:4px;border-radius:2px;margin-bottom:.9rem;background:var(--color-background-secondary);}
+.pfill{height:100%;border-radius:2px;transition:width .3s;}
+.u0 .pfill{background:var(--peach-d)}.u1 .pfill{background:var(--mint-d)}.u2 .pfill{background:var(--lav-d)}.u3 .pfill{background:var(--sky-d)}.u4 .pfill{background:var(--but-d)}.u5 .pfill{background:var(--rose-d)}
+/* 카드 */
+.cwrap{perspective:900px;height:280px;margin-bottom:.5rem;cursor:pointer;touch-action:pan-y;}
+.cinner{position:relative;width:100%;height:100%;transition:transform .42s;transform-style:preserve-3d;}
+.cwrap.fl .cinner{transform:rotateY(180deg);}
+.cface{position:absolute;inset:0;backface-visibility:hidden;border-radius:var(--cr);border:.5px solid var(--color-border-tertiary);background:var(--color-background-primary);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:1.5rem;box-shadow:var(--sh);}
+.cbk{transform:rotateY(180deg);}
+.cem{font-size:52px;margin-bottom:.5rem;line-height:1;}
+.cwd{font-size:28px;font-weight:500;color:var(--color-text-primary);text-align:center;line-height:1.4;}
+.cmn{font-size:20px;color:var(--color-text-secondary);margin-bottom:.3rem;font-weight:500;}
+.cpr{font-size:13px;border-radius:20px;padding:3px 12px;margin-bottom:.4rem;}
+.u0 .cpr{background:var(--peach);color:var(--peach-t)}.u1 .cpr{background:var(--mint);color:var(--mint-t)}.u2 .cpr{background:var(--lav);color:var(--lav-t)}.u3 .cpr{background:var(--sky);color:var(--sky-t)}.u4 .cpr{background:var(--but);color:var(--but-t)}.u5 .cpr{background:var(--rose);color:var(--rose-t)}
+.cst{font-size:17px;color:var(--color-text-primary);font-weight:500;text-align:center;line-height:1.5;margin-bottom:.3rem;}
+.csk{font-size:13px;color:var(--color-text-secondary);text-align:center;}
+.cht{font-size:11px;border-radius:10px;padding:3px 10px;margin-top:.35rem;}
+.u0 .cht{background:var(--peach);color:var(--peach-t)}.u1 .cht{background:var(--mint);color:var(--mint-t)}.u2 .cht{background:var(--lav);color:var(--lav-t)}.u3 .cht{background:var(--sky);color:var(--sky-t)}.u4 .cht{background:var(--but);color:var(--but-t)}.u5 .cht{background:var(--rose);color:var(--rose-t)}
+.abtn{display:flex;align-items:center;gap:5px;padding:6px 14px;border-radius:20px;font-size:12px;cursor:pointer;margin-top:.5rem;border:1.5px solid;}
+.u0 .abtn{border-color:var(--peach-d);background:var(--peach);color:var(--peach-t)}.u1 .abtn{border-color:var(--mint-d);background:var(--mint);color:var(--mint-t)}.u2 .abtn{border-color:var(--lav-d);background:var(--lav);color:var(--lav-t)}.u3 .abtn{border-color:var(--sky-d);background:var(--sky);color:var(--sky-t)}.u4 .abtn{border-color:var(--but-d);background:var(--but);color:var(--but-t)}.u5 .abtn{border-color:var(--rose-d);background:var(--rose);color:var(--rose-t)}
+.hint-s{font-size:10px;color:var(--color-text-tertiary);text-align:center;margin-bottom:.4rem;}
+.nav{display:flex;align-items:center;justify-content:space-between;}
+.nb{padding:9px 22px;border-radius:12px;border:.5px solid var(--color-border-secondary);background:var(--color-background-primary);color:var(--color-text-primary);font-size:14px;cursor:pointer;}
+.nb:disabled{opacity:.3;cursor:default;}
+.ctr{font-size:13px;color:var(--color-text-secondary);}
+.arow{display:flex;align-items:center;gap:8px;margin-bottom:.75rem;}
+.tl{font-size:12px;color:var(--color-text-secondary);}
+.tog{position:relative;display:inline-block;width:36px;height:20px;}
+.tog input{opacity:0;width:0;height:0;}
+.sl{position:absolute;inset:0;border-radius:20px;transition:.3s;cursor:pointer;background:var(--color-border-secondary);}
+.sl:before{content:'';position:absolute;height:14px;width:14px;left:3px;bottom:3px;background:white;border-radius:50%;transition:.3s;}
+input:checked+.sl{background:#8B75D9;}
+input:checked+.sl:before{transform:translateX(16px);}
+/* 공통 탭 */
+.stabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;}
+.stab{padding:5px 13px;border-radius:20px;border:.5px solid var(--color-border-secondary);background:var(--color-background-secondary);color:var(--color-text-secondary);font-size:12px;cursor:pointer;}
+.u0 .stab.on{background:var(--peach);color:var(--peach-t);border-color:var(--peach-d);}
+.u1 .stab.on{background:var(--mint);color:var(--mint-t);border-color:var(--mint-d);}
+.u2 .stab.on{background:var(--lav);color:var(--lav-t);border-color:var(--lav-d);}
+.u3 .stab.on{background:var(--sky);color:var(--sky-t);border-color:var(--sky-d);}
+.u4 .stab.on{background:var(--but);color:var(--but-t);border-color:var(--but-d);}
+.u5 .stab.on{background:var(--rose);color:var(--rose-t);border-color:var(--rose-d);}
+/* 대화카드 */
+.tpanel{border-radius:var(--cr);border:.5px solid var(--color-border-tertiary);background:var(--color-background-primary);padding:1.25rem;min-height:280px;display:flex;flex-direction:column;gap:8px;box-shadow:var(--sh);}
+.dlines{flex:1;display:flex;flex-direction:column;gap:5px;overflow-y:auto;max-height:170px;}
+.dline{display:flex;gap:8px;align-items:flex-start;cursor:pointer;border-radius:10px;padding:5px;transition:background .12s;}
+.dline:hover{background:var(--color-background-secondary);}
+.u0 .dline.hl{background:var(--peach)}.u1 .dline.hl{background:var(--mint)}.u2 .dline.hl{background:var(--lav)}.u3 .dline.hl{background:var(--sky)}.u4 .dline.hl{background:var(--but)}.u5 .dline.hl{background:var(--rose)}
+.sav{font-size:18px;min-width:24px;text-align:center;padding-top:2px;}
+.snm{font-size:10px;font-weight:500;margin-bottom:1px;}
+.sen{font-size:13px;color:var(--color-text-primary);line-height:1.4;}
+.sko{font-size:11px;color:var(--color-text-tertiary);}
+.dnav{display:flex;gap:8px;align-items:center;}
+.db{padding:7px 16px;border-radius:10px;border:.5px solid var(--color-border-secondary);background:var(--color-background-primary);color:var(--color-text-primary);font-size:13px;cursor:pointer;}
+.db:disabled{opacity:.3;cursor:default;}
+.db.pr{color:#fff;border-color:transparent;}
+.u0 .db.pr{background:var(--peach-d)}.u1 .db.pr{background:var(--mint-d)}.u2 .db.pr{background:var(--lav-d)}.u3 .db.pr{background:var(--sky-d)}.u4 .db.pr{background:var(--but-d)}.u5 .db.pr{background:var(--rose-d)}
+.dhear{display:flex;align-items:center;gap:4px;padding:7px 12px;border-radius:10px;border:.5px solid var(--color-border-secondary);background:var(--color-background-secondary);color:var(--color-text-secondary);font-size:12px;cursor:pointer;}
+/* 말하기 */
+.ppanel{border-radius:var(--cr);border:.5px solid var(--color-border-tertiary);background:var(--color-background-primary);padding:1.25rem;min-height:280px;display:flex;flex-direction:column;gap:8px;box-shadow:var(--sh);}
+.rlbl{font-size:12px;color:var(--color-text-secondary);margin-bottom:4px;}
+.rbtns{display:flex;gap:6px;flex-wrap:wrap;}
+.rbtn{padding:5px 12px;border-radius:20px;border:1.5px solid var(--color-border-secondary);background:var(--color-background-secondary);color:var(--color-text-secondary);font-size:12px;cursor:pointer;}
+.u0 .rbtn.on{background:var(--peach);border-color:var(--peach-d);color:var(--peach-t);}
+.u1 .rbtn.on{background:var(--mint);border-color:var(--mint-d);color:var(--mint-t);}
+.u2 .rbtn.on{background:var(--lav);border-color:var(--lav-d);color:var(--lav-t);}
+.u3 .rbtn.on{background:var(--sky);border-color:var(--sky-d);color:var(--sky-t);}
+.u4 .rbtn.on{background:var(--but);border-color:var(--but-d);color:var(--but-t);}
+.u5 .rbtn.on{background:var(--rose);border-color:var(--rose-d);color:var(--rose-t);}
+.cbox{flex:1;display:flex;flex-direction:column;gap:5px;overflow-y:auto;max-height:140px;}
+.cmsg{display:flex;gap:6px;align-items:flex-start;}
+.cmsg.usr{flex-direction:row-reverse;}
+.cav{font-size:17px;min-width:24px;text-align:center;}
+.cbbl{font-size:13px;padding:6px 10px;border-radius:12px;max-width:82%;line-height:1.5;}
+.cmsg.ai .cbbl{background:var(--color-background-secondary);color:var(--color-text-primary);border:.5px solid var(--color-border-tertiary);}
+.cmsg.usr .cbbl{color:#fff;}
+.u0 .cmsg.usr .cbbl{background:var(--peach-d)}.u1 .cmsg.usr .cbbl{background:var(--mint-d)}.u2 .cmsg.usr .cbbl{background:var(--lav-d)}.u3 .cmsg.usr .cbbl{background:var(--sky-d)}.u4 .cmsg.usr .cbbl{background:var(--but-d)}.u5 .cmsg.usr .cbbl{background:var(--rose-d)}
+.cmsg.hnt .cbbl{background:#E8F8F2;color:#1A5C47;border:.5px solid #9FE1CB;font-size:12px;}
+.cmsg.err .cbbl{background:#FFF0E8;color:#7A3B1E;border:.5px solid #F5C4B3;font-size:12px;}
+.mrow{display:flex;align-items:center;gap:8px;}
+.mbtn{display:flex;align-items:center;gap:6px;padding:10px 22px;border-radius:24px;border:none;color:#fff;font-size:14px;cursor:pointer;transition:background .2s;}
+.u0 .mbtn{background:var(--peach-d)}.u1 .mbtn{background:var(--mint-d)}.u2 .mbtn{background:var(--lav-d)}.u3 .mbtn{background:var(--sky-d)}.u4 .mbtn{background:var(--but-d)}.u5 .mbtn{background:var(--rose-d)}
+.mbtn.lst{background:#C96B8A!important;}
+.mbtn:disabled{opacity:.4;cursor:default;}
+.hlnk{font-size:11px;color:#8B75D9;cursor:pointer;text-decoration:underline;margin-left:auto;}
+/* mic tip */
+.mic-tip{font-size:11px;color:var(--color-text-tertiary);margin-top:4px;line-height:1.4;}
+</style>
+
+<div class="app" id="app">
+  <h2 class="sr-only">4학년 1학기 영어 플래시카드</h2>
+  <div id="hv"></div>
+  <div id="lv" style="display:none"></div>
+</div>
+
+<script>
+const BG=[['var(--peach)','var(--peach-t)'],['var(--mint)','var(--mint-t)'],['var(--lav)','var(--lav-t)'],['var(--sky)','var(--sky-t)'],['var(--but)','var(--but-t)'],['var(--rose)','var(--rose-t)']];
+const UC=['u0','u1','u2','u3','u4','u5'];
+const CHAR={
+  '준오':{t:'k',g:'m',a:'👦',c:'#1A4A6A'},'Eric':{t:'k',g:'m',a:'👦',c:'#3B6D11'},'Sam':{t:'k',g:'m',a:'👦',c:'#854F0B'},
+  'Kate':{t:'k',g:'f',a:'👧',c:'#993556'},'Amy':{t:'k',g:'f',a:'👧',c:'#993C1D'},'Momo':{t:'k',g:'f',a:'🐱',c:'#534AB7'},
+  '보라':{t:'k',g:'f',a:'👧',c:'#7F77DD'},'Hoa':{t:'k',g:'f',a:'👧',c:'#1D9E75'},
+  'Jane Green':{t:'a',g:'f',a:'👩‍🏫',c:'#0F6E56'},'안내원':{t:'a',g:'f',a:'👩',c:'#636362'},
+  '사서':{t:'a',g:'f',a:'👩',c:'#636362'},'Mr. Jones':{t:'a',g:'m',a:'👨',c:'#444441'},
+  '준오 할아버지':{t:'a',g:'m',a:'👴',c:'#444441'},'준오 할머니':{t:'a',g:'f',a:'👵',c:'#636362'},
+  '보라 엄마':{t:'a',g:'f',a:'👩',c:'#636362'},
+};
+function ci(n){return CHAR[n]||{t:'k',g:'m',a:'🤖',c:'#534AB7'};}
+let vKM=null,vKF=null,vAM=null,vAF=null;
+function loadV(){
+  const all=window.speechSynthesis.getVoices().filter(v=>v.lang.startsWith('en'));
+  vAM=all.find(v=>/daniel|david|mark|alex|male/i.test(v.name))||all[0];
+  vAF=all.find(v=>/samantha|victoria|karen|moira|female/i.test(v.name))||all[Math.min(1,all.length-1)];
+  vKM=vAM;vKF=vAF;
+}
+window.speechSynthesis.onvoiceschanged=loadV;loadV();
+function sAs(name,text,cb){
+  if(!('speechSynthesis' in window)){cb&&cb();return;}
+  window.speechSynthesis.cancel();
+  const inf=ci(name);const u=new SpeechSynthesisUtterance(text);
+  u.lang='en-US';
+  u.voice=inf.g==='f'?(inf.t==='k'?vKF:vAF):(inf.t==='k'?vKM:vAM);
+  u.pitch=inf.t==='k'?(inf.g==='f'?1.4:1.2):(inf.g==='f'?1.0:0.8);
+  u.rate=inf.t==='k'?0.85:0.78;
+  if(cb)u.onend=cb;
+  window.speechSynthesis.speak(u);
+}
+function sEN(text,cb){
+  if(!('speechSynthesis' in window)){cb&&cb();return;}
+  window.speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(text);
+  u.lang='en-US';u.rate=0.82;if(cb)u.onend=cb;
+  window.speechSynthesis.speak(u);
+}
+
+const UN=[
+  {title:"Lesson 1",sub:"My Name Is Amy",phonics:"t · meet/hat/sit",
+   words:[{emoji:"🌅",word:"morning",pron:"모닝",meaning:"아침",sentence:"Good morning!",sentKo:"좋은 아침이야!"},{emoji:"🌤️",word:"afternoon",pron:"애프터눈",meaning:"오후",sentence:"Good afternoon!",sentKo:"좋은 오후야!"},{emoji:"🌆",word:"evening",pron:"이브닝",meaning:"저녁",sentence:"Good evening!",sentKo:"좋은 저녁이야!"},{emoji:"🌙",word:"night",pron:"나잇",meaning:"밤",sentence:"Good night!",sentKo:"잘 자!"},{emoji:"👫",word:"friend",pron:"프렌드",meaning:"친구",sentence:"This is my friend.",sentKo:"얘는 내 친구야."},{emoji:"👥",word:"we",pron:"위",meaning:"우리",sentence:"We are friends.",sentKo:"우리는 친구야."},{emoji:"📛",word:"name",pron:"네임",meaning:"이름",sentence:"My name is Amy.",sentKo:"내 이름은 Amy야."},{emoji:"✨",word:"new",pron:"뉴",meaning:"새로운",sentence:"I'm new here.",sentKo:"나는 여기 새로 왔어."},{emoji:"🎒",word:"bag",pron:"백",meaning:"가방",sentence:"This is my bag.",sentKo:"이건 내 가방이야."},{emoji:"👨‍👩‍👧‍👦",word:"everyone",pron:"에브리원",meaning:"모두",sentence:"Hello, everyone!",sentKo:"안녕, 모두!"}],
+   sentences:[{emoji:"❓",sentence:"What's your name?",sentKo:"네 이름이 뭐야?",hint:"이름 물어볼 때"},{emoji:"👧",sentence:"My name is Amy.",sentKo:"내 이름은 Amy야.",hint:"자기소개"},{emoji:"🤝",sentence:"Nice to meet you.",sentKo:"만나서 반가워.",hint:"처음 만났을 때"},{emoji:"🤝",sentence:"Nice to meet you, too.",sentKo:"나도 만나서 반가워.",hint:"답할 때"},{emoji:"🌅",sentence:"Good morning.",sentKo:"좋은 아침이야.",hint:"아침 인사"},{emoji:"🌤️",sentence:"Good afternoon.",sentKo:"좋은 오후야.",hint:"오후 인사"},{emoji:"🌆",sentence:"Good evening.",sentKo:"좋은 저녁이야.",hint:"저녁 인사"},{emoji:"🌙",sentence:"Good night.",sentKo:"잘 자.",hint:"밤 인사"}],
+   funTalks:[
+    {title:"Fun Talk 1",scenes:[
+      {name:"Scene 1",lines:[{speaker:"준오",en:"Hi, Kate.",ko:"안녕, Kate."},{speaker:"Kate",en:"Hi, Juno.",ko:"안녕, 준오야."},{speaker:"준오",en:"Hello, I'm Juno. What's your name?",ko:"안녕, 나는 준오야. 네 이름이 뭐니?"},{speaker:"Amy",en:"Hi, Juno. My name is Amy.",ko:"준오야, 안녕. 내 이름은 Amy야."},{speaker:"준오",en:"Nice to meet you, Amy.",ko:"만나서 반가워, Amy."},{speaker:"Amy",en:"Nice to meet you, too.",ko:"나도 만나서 반가워."}]},
+      {name:"Scene 2",lines:[{speaker:"Momo",en:"Hello, Amy. My name is Momo.",ko:"안녕, Amy. 내 이름은 Momo야."},{speaker:"Amy",en:"Wow, Momo! I like your bag.",ko:"우와, Momo야! 나는 네 가방이 마음에 들어."}]}
+    ],roles:["준오","Kate","Amy","Momo"],playerRoleDefault:"준오"},
+    {title:"Fun Talk 2",scenes:[
+      {name:"Scene 1",lines:[{speaker:"Jane Green",en:"Good morning!",ko:"좋은 아침이에요!"},{speaker:"Sam",en:"Good morning, Ms. Green!",ko:"좋은 아침이에요, Green 선생님!"},{speaker:"Jane Green",en:"What's your name?",ko:"이름이 무엇인가요?"},{speaker:"Sam",en:"My name is Sam.",ko:"제 이름은 Sam이에요."},{speaker:"Jane Green",en:"Nice to meet you, Sam.",ko:"Sam, 만나서 반가워요."},{speaker:"Sam",en:"Nice to meet you, too.",ko:"저도 만나서 반가워요."},{speaker:"Jane Green",en:"Here you are.",ko:"여기 있어요."},{speaker:"Sam",en:"Oh, thank you.",ko:"오, 감사합니다."}]},
+      {name:"Scene 2",lines:[{speaker:"Jane Green",en:"Good afternoon, everyone!",ko:"여러분, 좋은 오후입니다!"},{speaker:"Jane Green",en:"My name is Jane Green.",ko:"제 이름은 Jane Green입니다."}]}
+    ],roles:["Sam","Jane Green"],playerRoleDefault:"Sam"}
+   ]},
+  {title:"Lesson 2",sub:"I'm Happy",phonics:"y · happy/sleepy/angry",
+   words:[{emoji:"😡",word:"angry",pron:"앵그리",meaning:"화난",sentence:"I'm angry.",sentKo:"나는 화났어."},{emoji:"😊",word:"happy",pron:"해피",meaning:"행복한",sentence:"I'm happy.",sentKo:"나는 행복해."},{emoji:"😢",word:"sad",pron:"새드",meaning:"슬픈",sentence:"I'm sad.",sentKo:"나는 슬퍼."},{emoji:"😴",word:"sleepy",pron:"슬리피",meaning:"졸린",sentence:"I'm sleepy.",sentKo:"나는 졸려."},{emoji:"😵",word:"thirsty",pron:"써스티",meaning:"목이 마른",sentence:"I'm thirsty.",sentKo:"나는 목이 말라."},{emoji:"😩",word:"tired",pron:"타이어드",meaning:"피곤한",sentence:"I'm tired.",sentKo:"나는 피곤해."},{emoji:"🔄",word:"again",pron:"어게인",meaning:"다시",sentence:"Try again!",sentKo:"다시 해봐!"},{emoji:"💪",word:"try",pron:"트라이",meaning:"시도하다",sentence:"Try again!",sentKo:"다시 해봐!"},{emoji:"💧",word:"water",pron:"워터",meaning:"물",sentence:"I want water.",sentKo:"물을 원해."}],
+   sentences:[{emoji:"❓",sentence:"Are you happy?",sentKo:"너 행복해?",hint:"기분 물어볼 때"},{emoji:"😊",sentence:"Yes, I am.",sentKo:"응, 나 행복해.",hint:"긍정 대답"},{emoji:"😔",sentence:"No, I'm not.",sentKo:"아니, 나는 행복하지 않아.",hint:"부정 대답"},{emoji:"😡",sentence:"I'm angry.",sentKo:"나는 화났어.",hint:"감정 표현"},{emoji:"😊",sentence:"I'm happy.",sentKo:"나는 행복해.",hint:"감정 표현"},{emoji:"😢",sentence:"I'm sad.",sentKo:"나는 슬퍼.",hint:"감정 표현"},{emoji:"😴",sentence:"I'm sleepy.",sentKo:"나는 졸려.",hint:"감정 표현"},{emoji:"😵",sentence:"I'm thirsty.",sentKo:"나는 목이 말라.",hint:"감정 표현"},{emoji:"😩",sentence:"I'm tired.",sentKo:"나는 피곤해.",hint:"감정 표현"}],
+   funTalks:[
+    {title:"Fun Talk 1",scenes:[
+      {name:"Scene 1",lines:[{speaker:"Eric",en:"Can you try again, Kate?",ko:"다시 시도할 수 있겠니, Kate?"},{speaker:"Kate",en:"Okay. Oh, no!",ko:"알겠어. 오, 안돼!"},{speaker:"Eric",en:"Are you sad?",ko:"너 슬프니?"},{speaker:"Kate",en:"No, I'm not. I can do it!",ko:"아니, 난 슬프지 않아. 나는 할 수 있어!"},{speaker:"보라",en:"Come on! We can do it!",ko:"힘내! 우리는 할 수 있어!"}]},
+      {name:"Scene 2",lines:[{speaker:"Sam, Eric",en:"Yeah! It's great!",ko:"와! 정말 좋다!"},{speaker:"보라",en:"Are you happy now?",ko:"이제 행복하니?"},{speaker:"Kate",en:"Yes, I am.",ko:"응, 나는 행복해."}]}
+    ],roles:["Kate","Eric","보라","Sam"],playerRoleDefault:"Kate"},
+    {title:"Fun Talk 2",scenes:[
+      {name:"Scene 1",lines:[{speaker:"보라",en:"Good afternoon.",ko:"좋은 오후야."},{speaker:"준오, Eric",en:"Hi, Bora.",ko:"안녕, 보라."},{speaker:"준오",en:"Are you tired?",ko:"너 피곤하니?"},{speaker:"Hoa",en:"Yes, I am. I'm tired.",ko:"응, 그래. 나는 피곤해."},{speaker:"준오",en:"Sit here.",ko:"여기 앉아."}]},
+      {name:"Scene 2",lines:[{speaker:"보라",en:"I'm thirsty. Do you have some water?",ko:"나 목말라. 너 물 있어?"},{speaker:"Hoa",en:"No, I don't.",ko:"아니, 없어."},{speaker:"Sam",en:"I have some water. Here it is.",ko:"나 물 있어. 여기 있어."},{speaker:"보라",en:"Oh, thank you.",ko:"오, 고마워."},{speaker:"준오",en:"Ready? Okay. Here I go!",ko:"준비됐어? 좋아. 간다!"},{speaker:"Hoa, Eric, Sam, 보라",en:"Yeah!",ko:"와!"}]}
+    ],roles:["준오","보라","Hoa","Sam","Eric"],playerRoleDefault:"준오"}
+   ]},
+  {title:"Lesson 3",sub:"Don't Sit Here",phonics:"k · drink/talk/book",
+   words:[{emoji:"🥤",word:"drink",pron:"드링크",meaning:"마시다",sentence:"Don't drink here.",sentKo:"여기서 마시지 마세요."},{emoji:"🍽️",word:"eat",pron:"잇",meaning:"먹다",sentence:"Don't eat here.",sentKo:"여기서 먹지 마세요."},{emoji:"👌",word:"fine",pron:"파인",meaning:"괜찮은",sentence:"I'm fine.",sentKo:"나 괜찮아."},{emoji:"🤚",word:"push",pron:"푸쉬",meaning:"밀다",sentence:"Don't push.",sentKo:"밀지 마세요."},{emoji:"💬",word:"talk",pron:"톡",meaning:"말하다",sentence:"Don't talk here.",sentKo:"여기서 말하지 마세요."},{emoji:"🎉",word:"welcome",pron:"웰컴",meaning:"환영하다",sentence:"You're welcome!",sentKo:"천만에요!"},{emoji:"⚠️",word:"careful",pron:"케어풀",meaning:"조심하는",sentence:"Be careful!",sentKo:"조심하세요!"},{emoji:"🚪",word:"enter",pron:"엔터",meaning:"들어가다",sentence:"Don't enter.",sentKo:"들어가지 마세요."},{emoji:"👋",word:"touch",pron:"터치",meaning:"만지다",sentence:"Don't touch.",sentKo:"만지지 마세요."}],
+   sentences:[{emoji:"🪑",sentence:"Don't sit here.",sentKo:"여기 앉지 마세요.",hint:"금지 표현"},{emoji:"👍",sentence:"Okay.",sentKo:"알겠습니다.",hint:"대답"},{emoji:"⚠️",sentence:"Be careful.",sentKo:"조심하세요.",hint:"경고"},{emoji:"🥤",sentence:"Don't drink.",sentKo:"마시지 마세요.",hint:"금지"},{emoji:"🍽️",sentence:"Don't eat.",sentKo:"먹지 마세요.",hint:"금지"},{emoji:"🚪",sentence:"Don't enter.",sentKo:"들어가지 마세요.",hint:"금지"},{emoji:"🤚",sentence:"Don't push.",sentKo:"밀지 마세요.",hint:"금지"},{emoji:"💬",sentence:"Don't talk.",sentKo:"말하지 마세요.",hint:"금지"},{emoji:"👋",sentence:"Don't touch.",sentKo:"만지지 마세요.",hint:"금지"}],
+   funTalks:[
+    {title:"Fun Talk 1",scenes:[
+      {name:"Scene 1",lines:[{speaker:"안내원",en:"Welcome, everyone. Line up here, please.",ko:"환영합니다. 여러분, 여기에 줄을 서 주세요."},{speaker:"Eric, 준오, 보라, Kate",en:"Okay.",ko:"알겠습니다."},{speaker:"보라",en:"I like robots. Look at the robot.",ko:"나는 로봇을 좋아해. 저 로봇을 봐."},{speaker:"준오",en:"Eric, don't push.",ko:"Eric, 밀지 마."},{speaker:"Eric",en:"Okay. Wow, it's very tall!",ko:"알겠어. 와, 키가 정말 크다!"},{speaker:"보라",en:"Right. It's very big, too.",ko:"맞아. 정말 크기도 해."}]},
+      {name:"Scene 2",lines:[{speaker:"준오",en:"Oh, I'm tired.",ko:"오, 나 피곤해."},{speaker:"Kate",en:"Don't sit here, Juno.",ko:"여기에 앉지 마, 준오야."},{speaker:"준오",en:"Okay.",ko:"알겠어."},{speaker:"안내원",en:"Sit over there, please.",ko:"저기 앉아 주세요."},{speaker:"준오",en:"Thank you.",ko:"고맙습니다."}]}
+    ],roles:["준오","Eric","Kate","보라"],playerRoleDefault:"준오"},
+    {title:"Fun Talk 2",scenes:[
+      {name:"Scene 1",lines:[{speaker:"보라",en:"Wow, it's great.",ko:"와, 멋지다."},{speaker:"Kate",en:"Come here, Bora. Look! I love this house.",ko:"여기로 와, 보라야. 봐! 나는 이 집이 정말 좋아."},{speaker:"보라",en:"Yeah, it's pretty.",ko:"맞아. 예쁘다."},{speaker:"Kate",en:"Be careful. Don't touch. Look at this.",ko:"조심해. 만지지 마. 이거 봐."},{speaker:"보라",en:"Okay.",ko:"알겠어."}]},
+      {name:"Scene 2",lines:[{speaker:"사서",en:"Don't eat here, please.",ko:"여기서 먹지 마세요."},{speaker:"Eric",en:"I'm sorry.",ko:"죄송합니다."},{speaker:"사서",en:"Be careful.",ko:"조심하세요."},{speaker:"Sam",en:"Okay. Thank you.",ko:"알겠어요. 감사합니다."},{speaker:"사서",en:"You're welcome.",ko:"천만에요."}]}
+    ],roles:["준오","Eric","Kate","보라","Sam"],playerRoleDefault:"준오"}
+   ]},
+  {title:"Lesson 4",sub:"Let's Play Basketball",phonics:"r · soccer/four/door",
+   words:[{emoji:"⚾",word:"baseball",pron:"베이스볼",meaning:"야구",sentence:"Let's play baseball.",sentKo:"야구를 하자."},{emoji:"🏀",word:"basketball",pron:"바스켓볼",meaning:"농구",sentence:"Let's play basketball.",sentKo:"농구를 하자."},{emoji:"⚽",word:"soccer",pron:"사커",meaning:"축구",sentence:"Let's play soccer.",sentKo:"축구를 하자."},{emoji:"🎾",word:"tennis",pron:"테니스",meaning:"테니스",sentence:"Let's play tennis.",sentKo:"테니스를 치자."},{emoji:"🏸",word:"badminton",pron:"배드민턴",meaning:"배드민턴",sentence:"Let's play badminton.",sentKo:"배드민턴을 치자."},{emoji:"😞",word:"bad",pron:"배드",meaning:"나쁜",sentence:"That's too bad.",sentKo:"안됐구나."},{emoji:"🏃",word:"busy",pron:"비지",meaning:"바쁜",sentence:"I'm busy today.",sentKo:"나는 오늘 바빠."},{emoji:"🤧",word:"sick",pron:"씩",meaning:"아픈",sentence:"I'm sick.",sentKo:"나 아파."},{emoji:"🔊",word:"sound",pron:"사운드",meaning:"~처럼 들리다",sentence:"Sounds good!",sentKo:"좋아!"}],
+   sentences:[{emoji:"🏀",sentence:"Let's play basketball.",sentKo:"농구를 하자.",hint:"제안"},{emoji:"⚾",sentence:"Let's play baseball.",sentKo:"야구를 하자.",hint:"제안"},{emoji:"⚽",sentence:"Let's play soccer.",sentKo:"축구를 하자.",hint:"제안"},{emoji:"🎾",sentence:"Let's play tennis.",sentKo:"테니스를 치자.",hint:"제안"},{emoji:"🏸",sentence:"Let's play badminton.",sentKo:"배드민턴을 치자.",hint:"제안"},{emoji:"😊",sentence:"Sounds good.",sentKo:"좋아.",hint:"동의"},{emoji:"😔",sentence:"Sorry, I can't.",sentKo:"미안, 나는 할 수 없어.",hint:"거절"},{emoji:"😞",sentence:"That's too bad.",sentKo:"안됐구나.",hint:"유감"}],
+   funTalks:[
+    {title:"Fun Talk 1",scenes:[
+      {name:"Scene 1",lines:[{speaker:"Eric",en:"Kate! Do you like badminton?",ko:"Kate! 너는 배드민턴을 좋아하니?"},{speaker:"Kate",en:"Yes, I do.",ko:"응, 좋아해."},{speaker:"Eric",en:"Let's play badminton.",ko:"배드민턴 치자."},{speaker:"Kate",en:"Sorry, I can't. I'm tired.",ko:"미안, 나는 할 수 없어. 나는 피곤해."},{speaker:"Eric",en:"Okay.",ko:"알겠어."}]},
+      {name:"Scene 2",lines:[{speaker:"보라",en:"Hey, Eric! Let's play basketball.",ko:"이봐, Eric! 농구를 하자."},{speaker:"Eric",en:"Sounds good!",ko:"좋아!"},{speaker:"Momo",en:"Pass, Eric! Pass!",ko:"넘겨, Eric! 넘겨!"},{speaker:"Eric, 보라, 준오",en:"Great, Momo!",ko:"좋았어, Momo!"},{speaker:"Momo",en:"I love basketball!",ko:"나는 농구가 매우 좋아!"}]}
+    ],roles:["Eric","Kate","보라","Momo","준오"],playerRoleDefault:"Eric"},
+    {title:"Fun Talk 2",scenes:[
+      {name:"Scene 1",lines:[{speaker:"Sam",en:"Hello!",ko:"안녕!"},{speaker:"Eric, 준오, Kate",en:"Hi, Sam.",ko:"안녕, Sam."},{speaker:"Sam",en:"Let's play baseball.",ko:"야구를 하자."},{speaker:"Eric, 준오, Kate",en:"Sounds good!",ko:"좋아!"},{speaker:"Sam",en:"Bora! Hoa! Let's play baseball.",ko:"보라! Hoa! 야구를 하자."},{speaker:"보라",en:"Sorry, I can't. I'm sick. Bye.",ko:"미안, 나는 할 수 없어. 나는 아파. 안녕."},{speaker:"Sam",en:"Oh, that's too bad. Bye.",ko:"오, 안됐구나. 안녕."},{speaker:"Kate, Eric, Hoa, 준오",en:"Bye, Bora.",ko:"안녕, 보라."},{speaker:"Hoa",en:"I can play.",ko:"나는 할 수 있어."},{speaker:"준오",en:"That's good.",ko:"좋아."}]},
+      {name:"Scene 2",lines:[{speaker:"Sam",en:"Come on!",ko:"어서 와!"},{speaker:"Kate, Hoa",en:"That's okay, Sam. You can do it!",ko:"괜찮아, Sam. 너는 할 수 있어!"}]}
+    ],roles:["Sam","Eric","준오","Kate","보라","Hoa"],playerRoleDefault:"Sam"}
+   ]},
+  {title:"Lesson 5",sub:"I Want Chicken",phonics:"d · bread/salad/dad",
+   words:[{emoji:"🍞",word:"bread",pron:"브레드",meaning:"빵",sentence:"I want bread.",sentKo:"나는 빵을 원해."},{emoji:"🍗",word:"chicken",pron:"치킨",meaning:"치킨",sentence:"I want chicken.",sentKo:"나는 치킨을 원해."},{emoji:"🍝",word:"noodles",pron:"누들스",meaning:"국수",sentence:"I want noodles.",sentKo:"나는 국수를 원해."},{emoji:"🍲",word:"soup",pron:"수프",meaning:"수프",sentence:"I want soup.",sentKo:"나는 수프를 원해."},{emoji:"🥗",word:"salad",pron:"샐러드",meaning:"샐러드",sentence:"I want salad.",sentKo:"나는 샐러드를 원해."},{emoji:"🍦",word:"ice cream",pron:"아이스크림",meaning:"아이스크림",sentence:"I want ice cream.",sentKo:"나는 아이스크림을 원해."},{emoji:"🤲",word:"help",pron:"헬프",meaning:"돕다",sentence:"Help yourself.",sentKo:"마음껏 먹어."},{emoji:"🥛",word:"milk",pron:"밀크",meaning:"우유",sentence:"I want milk.",sentKo:"나는 우유를 원해."},{emoji:"🍕",word:"pizza",pron:"피자",meaning:"피자",sentence:"I want pizza.",sentKo:"나는 피자를 원해."}],
+   sentences:[{emoji:"❓",sentence:"What do you want?",sentKo:"무엇을 원해?",hint:"물어볼 때"},{emoji:"🍗",sentence:"I want chicken.",sentKo:"나는 치킨을 원해.",hint:"원하는 것"},{emoji:"🍞",sentence:"I want bread.",sentKo:"나는 빵을 원해.",hint:"원하는 것"},{emoji:"🍝",sentence:"I want noodles.",sentKo:"나는 국수를 원해.",hint:"원하는 것"},{emoji:"🍲",sentence:"I want soup.",sentKo:"나는 수프를 원해.",hint:"원하는 것"},{emoji:"🥗",sentence:"I want salad.",sentKo:"나는 샐러드를 원해.",hint:"원하는 것"},{emoji:"🍦",sentence:"I want ice cream.",sentKo:"나는 아이스크림을 원해.",hint:"원하는 것"},{emoji:"🥛",sentence:"I want milk.",sentKo:"나는 우유를 원해.",hint:"원하는 것"},{emoji:"🍕",sentence:"I want pizza.",sentKo:"나는 피자를 원해.",hint:"원하는 것"},{emoji:"🤲",sentence:"Help yourself.",sentKo:"마음껏 먹어.",hint:"권할 때"}],
+   funTalks:[
+    {title:"Fun Talk 1",scenes:[
+      {name:"Scene 1",lines:[{speaker:"Sam",en:"Look! I want chicken.",ko:"봐봐! 나는 치킨을 원해."},{speaker:"보라",en:"Me, too! Let's go!",ko:"나도 그래! 가자!"},{speaker:"보라 엄마",en:"What do you want?",ko:"무엇을 원하니?"},{speaker:"Kate",en:"I want pizza. What do you want, Juno?",ko:"저는 피자를 원해요. 무엇을 원하니, 준오야?"},{speaker:"준오",en:"Mmm... I want noodles.",ko:"음… 나는 국수를 원해."}]},
+      {name:"Scene 2",lines:[{speaker:"보라",en:"Oh, Momo! It's hot.",ko:"오, Momo야! 그거 매워."},{speaker:"Momo",en:"It's okay. Oh, water, please!",ko:"괜찮아. 오, 물 좀 주세요!"}]}
+    ],roles:["Sam","보라","Kate","준오","Momo"],playerRoleDefault:"준오"},
+    {title:"Fun Talk 2",scenes:[
+      {name:"Scene 1",lines:[{speaker:"준오 할아버지",en:"Come here, please.",ko:"이리로 오렴."},{speaker:"준오 할머니",en:"Help yourself.",ko:"마음껏 먹으렴."},{speaker:"준오, Kate, Eric, Hoa",en:"Wow, thank you very much.",ko:"와, 정말 감사합니다."},{speaker:"준오",en:"What do you want?",ko:"무엇을 원하니?"},{speaker:"Eric",en:"I want bulgogi.",ko:"나는 불고기를 원해."},{speaker:"준오",en:"Here you are.",ko:"여기 있어."}]},
+      {name:"Scene 2",lines:[{speaker:"Hoa",en:"I like salad!",ko:"나는 샐러드를 좋아해!"},{speaker:"Kate",en:"Me, too. Mmm... It's good.",ko:"나도. 음… 맛있다."},{speaker:"Hoa",en:"What's that?",ko:"그것은 뭐야?"},{speaker:"준오",en:"It's japchae. Help yourself.",ko:"이건 잡채야. 마음껏 먹어."},{speaker:"Hoa",en:"Thanks. Wow, I like it!",ko:"고마워. 와, 나 이거 좋아해!"}]}
+    ],roles:["준오","Kate","Eric","Hoa"],playerRoleDefault:"준오"}
+   ]},
+  {title:"Lesson 6",sub:"Where's My Cap?",phonics:"p · cap/cup/jump",
+   words:[{emoji:"🛏️",word:"bed",pron:"베드",meaning:"침대",sentence:"It's on the bed.",sentKo:"침대 위에 있어."},{emoji:"📦",word:"box",pron:"박스",meaning:"상자",sentence:"It's in the box.",sentKo:"상자 안에 있어."},{emoji:"🪑",word:"chair",pron:"체어",meaning:"의자",sentence:"It's on the chair.",sentKo:"의자 위에 있어."},{emoji:"📚",word:"desk",pron:"데스크",meaning:"책상",sentence:"It's on the desk.",sentKo:"책상 위에 있어."},{emoji:"🌀",word:"fan",pron:"팬",meaning:"부채",sentence:"Where's the fan?",sentKo:"부채가 어디 있어?"},{emoji:"💡",word:"know",pron:"노우",meaning:"알다",sentence:"I don't know.",sentKo:"나는 몰라."},{emoji:"🪵",word:"table",pron:"테이블",meaning:"탁자",sentence:"It's on the table.",sentKo:"탁자 위에 있어."},{emoji:"⬇️",word:"under",pron:"언더",meaning:"아래에",sentence:"It's under the bed.",sentKo:"침대 아래에 있어."},{emoji:"❓",word:"where",pron:"웨어",meaning:"어디에",sentence:"Where's my cap?",sentKo:"내 모자는 어디에 있어?"}],
+   sentences:[{emoji:"🧢",sentence:"Where's my cap?",sentKo:"내 모자는 어디에 있어?",hint:"위치 물어볼 때"},{emoji:"📦",sentence:"It's in the box.",sentKo:"상자 안에 있어.",hint:"안에"},{emoji:"🛏️",sentence:"It's on the bed.",sentKo:"침대 위에 있어.",hint:"위에"},{emoji:"🪑",sentence:"It's on the chair.",sentKo:"의자 위에 있어.",hint:"위에"},{emoji:"📚",sentence:"It's on the desk.",sentKo:"책상 위에 있어.",hint:"위에"},{emoji:"🪵",sentence:"It's on the table.",sentKo:"탁자 위에 있어.",hint:"위에"},{emoji:"⬇️",sentence:"It's under the bed.",sentKo:"침대 아래에 있어.",hint:"아래에"},{emoji:"⬇️",sentence:"It's under the chair.",sentKo:"의자 아래에 있어.",hint:"아래에"},{emoji:"⬇️",sentence:"It's under the desk.",sentKo:"책상 아래에 있어.",hint:"아래에"},{emoji:"⬇️",sentence:"It's under the table.",sentKo:"탁자 아래에 있어.",hint:"아래에"},{emoji:"🤷",sentence:"I don't know.",sentKo:"나는 몰라.",hint:"모를 때"}],
+   funTalks:[
+    {title:"Fun Talk 1",scenes:[
+      {name:"Scene 1",lines:[{speaker:"Mr. Jones",en:"The bus is ready. Let's go.",ko:"버스가 준비됐다. 가자."},{speaker:"Eric, 보라, 준오",en:"Yeah!",ko:"예!"},{speaker:"Eric",en:"Where's my bag?",ko:"내 가방은 어디에 있지?"},{speaker:"보라",en:"It's under the chair.",ko:"의자 아래에 있어."},{speaker:"준오",en:"Where's my cap?",ko:"내 모자는 어디에 있지?"},{speaker:"Momo",en:"It's on the table. Here.",ko:"탁자 위에 있어. 여기."},{speaker:"준오",en:"Thank you, Momo.",ko:"고마워, Momo."}]},
+      {name:"Scene 2",lines:[{speaker:"Mr. Jones",en:"Sit down, everyone.",ko:"모두 앉으세요."},{speaker:"Eric, 보라, 준오",en:"Okay.",ko:"네."},{speaker:"준오",en:"Where's Momo?",ko:"Momo는 어디에 있어?"},{speaker:"Eric, 보라, 준오",en:"Momo!",ko:"Momo!"}]}
+    ],roles:["준오","Eric","보라","Momo"],playerRoleDefault:"준오"},
+    {title:"Fun Talk 2",scenes:[
+      {name:"Scene 1",lines:[{speaker:"Eric",en:"Where's my pen?",ko:"내 펜은 어디에 있어?"},{speaker:"Sam",en:"I don't know.",ko:"모르겠어."},{speaker:"보라",en:"It's on the desk.",ko:"책상 위에 있어."},{speaker:"Eric",en:"K-O-R-E-A. I like it.",ko:"K-O-R-E-A. 이거 마음에 들어."},{speaker:"보라",en:"I like it, too.",ko:"나도 마음에 들어."}]},
+      {name:"Scene 2",lines:[{speaker:"Kate",en:"Tada!",ko:"짜잔!"},{speaker:"준오",en:"Wow, it's nice.",ko:"와, 멋있다."},{speaker:"Kate",en:"Where's my tape?",ko:"내 테이프는 어디에 있어?"},{speaker:"Hoa",en:"Look! It's under the chair.",ko:"봐! 의자 아래에 있어."},{speaker:"Kate",en:"I love Korea!",ko:"나는 한국을 사랑해!"}]}
+    ],roles:["준오","Eric","Kate","보라","Sam","Hoa"],playerRoleDefault:"준오"}
+   ]},
+];
+
+let cU=-1,cM='word',cC=0,fl=false,cT=0,cSc=0,cL=0;
+let pRole='',pSc=0,pLines=[],pStep=0;
+let rec=null,mic=false,lErr=false,txS=0,tyS=0;
+
+function uc(){return UC[cU]||'u0';}
+
+function showHome(){
+  cU=-1;window.speechSynthesis&&window.speechSynthesis.cancel();
+  document.getElementById('hv').style.display='block';
+  document.getElementById('lv').style.display='none';
+  document.getElementById('hv').innerHTML=`
+    <div class="home-title">🌟 4학년 1학기 영어</div>
+    <div class="home-sub">천재교육 함순애 · 단원을 선택해봐요!</div>
+    <div class="lesson-grid">
+      ${UN.map((u,i)=>`<div class="lc lc${i}" onclick="goLesson(${i})">
+        <div class="lnum">${i+1}</div>
+        <div class="lname">${u.sub}</div>
+      </div>`).join('')}
+    </div>`;
+}
+
+function goLesson(i){
+  cU=i;cM='word';cC=0;fl=false;cT=0;cSc=0;cL=0;pRole='';pSc=0;
+  document.getElementById('hv').style.display='none';
+  document.getElementById('lv').style.display='block';
+  renderL();
+}
+
+function renderL(){
+  const u=UN[cU];const [bg,tc]=BG[cU];
+  document.getElementById('lv').className=uc();
+  document.getElementById('lv').innerHTML=`
+    <div class="lhdr">
+      <button class="back-btn" onclick="showHome()">← 목록</button>
+      <span class="lbadge" style="background:${bg};color:${tc}">${u.title}</span>
+      <span class="lsub">${u.sub}</span>
+    </div>
+    <div class="mtabs">
+      ${[['word','🃏','단어'],['sentence','💬','문장'],['talk','📖','대화 카드'],['practice','🎤','말하기']].map(([m,ic,lb])=>
+        `<div class="mtab ${cM===m?'on':''}" onclick="setM('${m}')"><span class="ti">${ic}</span>${lb}</div>`
+      ).join('')}
+    </div>
+    <div id="mc"></div>`;
+  renderM();
+}
+
+function setM(m){cM=m;cC=0;fl=false;cT=0;cSc=0;cL=0;renderL();}
+
+function renderM(){
+  const el=document.getElementById('mc');
+  if(cM==='word'||cM==='sentence')renderCard(el);
+  else if(cM==='talk')renderTalk(el);
+  else renderPrac(el);
+}
+
+// ── 카드 ──
+function renderCard(el){
+  const u=UN[cU];
+  const items=cM==='word'?u.words:u.sentences;
+  const it=items[cC];const tot=items.length;
+  const pct=((cC+1)/tot*100).toFixed(0);
+  let front,back;
+  if(cM==='word'){
+    front=`<div class="cem">${it.emoji}</div><div class="cwd">${it.word}</div>`;
+    back=`<div class="cem">${it.emoji}</div><div class="cmn">${it.meaning}</div><div class="cpr">${it.pron}</div><div class="cst">${it.sentence}</div><div class="csk">${it.sentKo}</div>
+      <button class="abtn" onclick="event.stopPropagation();sEN('${it.word}. ${it.sentence.replace(/'/g,"\\'")}')"><i class="ti ti-volume" aria-hidden="true"></i> 다시 듣기</button>`;
+  }else{
+    front=`<div class="cem">${it.emoji}</div><div class="cwd">${it.sentence}</div>`;
+    back=`<div class="cem">${it.emoji}</div><div class="cst">${it.sentKo}</div>${it.hint?`<div class="cht">${it.hint}</div>`:''}
+      <button class="abtn" onclick="event.stopPropagation();sEN('${it.sentence.replace(/'/g,"\\'")}')"><i class="ti ti-volume" aria-hidden="true"></i> 다시 듣기</button>`;
+  }
+  el.innerHTML=`
+    <div class="arow">
+      <span class="tl">뒤집으면 자동 읽기</span>
+      <label class="tog"><input type="checkbox" id="aSpk" checked><span class="sl"></span></label>
+      <span style="font-size:11px;color:var(--color-text-tertiary);margin-left:8px">파닉스: ${u.phonics}</span>
+    </div>
+    <div class="pbar"><div class="pfill" style="width:${pct}%"></div></div>
+    <div class="cwrap ${fl?'fl':''}" id="cw" onclick="doFlip()">
+      <div class="cinner">
+        <div class="cface">${front}</div>
+        <div class="cface cbk">${back}</div>
+      </div>
+    </div>
+    <p class="hint-s">클릭·스페이스 뒤집기 &nbsp;|&nbsp; ←→ 이동·스와이프</p>
+    <div class="nav">
+      <button class="nb" ${cC===0?'disabled':''} onclick="cGo(-1)">← 이전</button>
+      <span class="ctr">${cC+1} / ${tot}</span>
+      <button class="nb" ${cC===tot-1?'disabled':''} onclick="cGo(1)">다음 →</button>
+    </div>`;
+  const cw=document.getElementById('cw');
+  if(cw){
+    cw.addEventListener('touchstart',e=>{txS=e.touches[0].clientX;tyS=e.touches[0].clientY;},{passive:true});
+    cw.addEventListener('touchend',e=>{
+      const dx=e.changedTouches[0].clientX-txS,dy=e.changedTouches[0].clientY-tyS;
+      if(Math.abs(dx)>Math.abs(dy)&&Math.abs(dx)>40){dx<0?cGo(1):cGo(-1);}
+    },{passive:true});
+  }
+}
+function doFlip(){
+  fl=!fl;
+  const cw=document.getElementById('cw');if(cw)cw.classList.toggle('fl',fl);
+  if(fl){
+    const chk=document.getElementById('aSpk');
+    if(chk&&chk.checked){
+      const it=(cM==='word'?UN[cU].words:UN[cU].sentences)[cC];
+      const txt=cM==='word'?it.word+'. '+it.sentence:it.sentence;
+      setTimeout(()=>sEN(txt),420);
+    }
+  }
+}
+function cGo(d){
+  const items=cM==='word'?UN[cU].words:UN[cU].sentences;
+  const n=cC+d;if(n<0||n>=items.length)return;
+  cC=n;fl=false;renderM();
+}
+
+// ── 대화카드 ──
+function renderTalk(el){
+  const u=UN[cU];const talks=u.funTalks;
+  if(!talks||!talks.length){el.innerHTML='<div style="padding:1.5rem;text-align:center;color:var(--color-text-tertiary);font-size:13px">대본 준비 중이에요 📖</div>';return;}
+  const talk=talks[cT];
+  const lines=talk.scenes[cSc].lines;
+  el.innerHTML=`
+    <div class="tpanel">
+      <div class="stabs">
+        ${talks.map((t,i)=>`<button class="stab ${i===cT?'on':''}" onclick="tSel(${i})">${t.title}</button>`).join('')}
+      </div>
+      <div class="stabs">
+        ${talk.scenes.map((s,i)=>`<button class="stab ${i===cSc?'on':''}" onclick="scSel(${i})">${s.name}</button>`).join('')}
+      </div>
+      <div class="dlines" id="dl">
+        ${lines.map((l,i)=>{const inf=ci(l.speaker);return`
+          <div class="dline ${i===cL?'hl':''}" onclick="lClick(${i})">
+            <div class="sav">${inf.a}</div>
+            <div>
+              <div class="snm" style="color:${inf.c}">${l.speaker}</div>
+              <div class="sen">${l.en}</div>
+              <div class="sko">${l.ko}</div>
+            </div>
+          </div>`;}).join('')}
+      </div>
+      <div class="dnav">
+        <button class="db" ${cL===0?'disabled':''} onclick="dGo(-1)">← 이전</button>
+        <button class="dhear" onclick="spkLine()"><i class="ti ti-volume" aria-hidden="true"></i> 듣기</button>
+        <button class="db pr" ${cL===lines.length-1?'disabled':''} onclick="dGo(1)">다음 →</button>
+      </div>
+    </div>`;
+  setTimeout(()=>{const h=document.querySelector('.dline.hl');if(h)h.scrollIntoView({block:'nearest',behavior:'smooth'});},50);
+}
+function tSel(i){cT=i;cSc=0;cL=0;renderM();}
+function scSel(i){cSc=i;cL=0;renderM();}
+function lClick(i){cL=i;const l=UN[cU].funTalks[cT].scenes[cSc].lines[i];sAs(l.speaker,l.en);renderM();}
+function dGo(d){
+  const lines=UN[cU].funTalks[cT].scenes[cSc].lines;
+  const n=cL+d;if(n<0||n>=lines.length)return;
+  cL=n;sAs(lines[n].speaker,lines[n].en);renderM();
+}
+function spkLine(){const l=UN[cU].funTalks[cT].scenes[cSc].lines[cL];sAs(l.speaker,l.en);}
+
+// ── 말하기 연습 ──
+function renderPrac(el){
+  const u=UN[cU];const talks=u.funTalks;
+  if(!talks||!talks.length){el.innerHTML='<div style="padding:1.5rem;text-align:center;color:var(--color-text-tertiary);font-size:13px">대본 준비 중이에요 🎤</div>';return;}
+  const talk=talks[0];
+  if(!pRole)pRole=talk.playerRoleDefault;
+  el.innerHTML=`
+    <div class="ppanel">
+      <div>
+        <div class="rlbl">내 역할 선택 👇</div>
+        <div class="rbtns">
+          ${talk.roles.map(r=>{const inf=ci(r);return`<button class="rbtn ${r===pRole?'on':''}" onclick="rSet('${r}')">${inf.a} ${r}</button>`;}).join('')}
+        </div>
+      </div>
+      <div class="stabs">
+        ${talk.scenes.map((s,i)=>`<button class="stab ${i===pSc?'on':''}" onclick="pScSet(${i})">${s.name}</button>`).join('')}
+      </div>
+      <div class="cbox" id="cb"></div>
+      <div class="mrow">
+        <button class="mbtn" id="mb" onclick="togMic()">
+          <i class="ti ti-microphone" aria-hidden="true"></i>
+          <span id="ml">말하기 🎤</span>
+        </button>
+        <span class="hlnk" onclick="doHint()">💡 힌트</span>
+      </div>
+      <div class="mic-tip">💡 Chrome 브라우저 + 마이크 권한 허용 필요 &nbsp;|&nbsp; 모바일에서도 잘 돼요!</div>
+    </div>`;
+  startPrac();
+}
+function rSet(r){pRole=r;renderM();}
+function pScSet(i){pSc=i;renderM();}
+function startPrac(){
+  if(rec){try{rec.abort();}catch(e){}rec=null;}
+  mic=false;lErr=false;
+  const talk=UN[cU].funTalks[0];
+  pLines=talk.scenes[pSc].lines;pStep=0;
+  const cb=document.getElementById('cb');if(cb)cb.innerHTML='';
+  const mb=document.getElementById('mb');if(mb)mb.disabled=false;
+  advP();
+}
+function advP(){
+  if(pStep>=pLines.length){addC('hnt','🎉 대화 완성! 정말 잘했어요!','','');const mb=document.getElementById('mb');if(mb)mb.disabled=true;return;}
+  const l=pLines[pStep];
+  if(l.speaker!==pRole){
+    addC('ai',l.en,l.ko,l.speaker);
+    sAs(l.speaker,l.en,()=>{pStep++;setTimeout(advP,300);});
+  }else{
+    lErr=false;
+    addC('hnt','내 차례! 👉 <b>'+l.en+'</b>','('+l.ko+')','');
+    const mb=document.getElementById('mb');if(mb)mb.disabled=false;
+  }
+}
+function addC(type,text,sub,spk){
+  const cb=document.getElementById('cb');if(!cb)return;
+  const div=document.createElement('div');
+  const isU=type==='usr';
+  div.className='cmsg '+(type==='hnt'?'hnt':type==='err'?'err':isU?'usr':'ai');
+  const inf=spk?ci(spk):null;
+  let av=type==='hnt'?'💡':type==='err'?'❌':isU?ci(pRole).a:inf?inf.a:'🤖';
+  const spLbl=spk?`<div style="font-size:10px;font-weight:500;color:${inf.c};margin-bottom:2px">${spk}</div>`:'';
+  div.innerHTML=`<div class="cav">${av}</div><div class="cbbl">${spLbl}${text}${sub?'<div style="font-size:11px;opacity:.65;margin-top:2px">'+sub+'</div>':''}</div>`;
+  cb.appendChild(div);cb.scrollTop=cb.scrollHeight;
+}
+function togMic(){
+  if(mic){stopMic();return;}
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){addC('err','Chrome 브라우저에서 사용해 주세요 🙏','','');return;}
+  rec=new SR();rec.lang='en-US';rec.interimResults=false;rec.maxAlternatives=5;
+  rec.onstart=()=>{
+    mic=true;lErr=false;
+    const mb=document.getElementById('mb');if(mb)mb.classList.add('lst');
+    const ml=document.getElementById('ml');if(ml)ml.textContent='듣는 중... 🎙️';
+  };
+  rec.onresult=(e)=>{
+    const res=Array.from(e.results[0]).map(r=>r.transcript.trim().toLowerCase());
+    const tgt=pLines[pStep].en.toLowerCase().replace(/[.,!?']/g,'').trim();
+    const ok=res.some(r=>wOv(r.replace(/[.,!?']/g,'').trim(),tgt)>=0.55);
+    addC('usr',res[0],'','');
+    if(ok){addC('hnt','👍 잘했어요!','','');pStep++;stopMic();setTimeout(advP,500);}
+    else{if(!lErr){addC('err','잘 안 들렸어요. 다시 말해봐! 🎤','','');lErr=true;}stopMic();}
+  };
+  rec.onerror=(ev)=>{if(ev.error!=='aborted'&&!lErr){addC('err','잘 안 들렸어요. 다시 말해봐! 🎤','','');lErr=true;}stopMic();};
+  rec.onend=()=>stopMic();
+  try{rec.start();}catch(e){stopMic();}
+}
+function stopMic(){
+  mic=false;try{if(rec)rec.stop();}catch(e){}
+  const mb=document.getElementById('mb');if(mb)mb.classList.remove('lst');
+  const ml=document.getElementById('ml');if(ml)ml.textContent='말하기 🎤';
+}
+function wOv(a,b){
+  const wa=new Set(a.split(' ').filter(Boolean));const wb=b.split(' ').filter(Boolean);
+  if(!wb.length)return 0;return wb.filter(w=>wa.has(w)).length/wb.length;
+}
+function doHint(){
+  if(pStep<pLines.length){
+    const l=pLines[pStep];sAs(l.speaker,l.en);lErr=false;
+    addC('hnt','💡 힌트: <b>'+l.en+'</b>','('+l.ko+')','');
+  }
+}
+document.addEventListener('keydown',e=>{
+  if(e.target.tagName==='INPUT'||e.target.tagName==='BUTTON')return;
+  if(cU<0)return;
+  if(cM==='word'||cM==='sentence'){
+    if(e.code==='Space'){e.preventDefault();doFlip();}
+    if(e.code==='ArrowRight'){e.preventDefault();cGo(1);}
+    if(e.code==='ArrowLeft'){e.preventDefault();cGo(-1);}
+  }
+  if(cM==='talk'){
+    if(e.code==='ArrowRight'){e.preventDefault();dGo(1);}
+    if(e.code==='ArrowLeft'){e.preventDefault();dGo(-1);}
+    if(e.code==='Space'){e.preventDefault();spkLine();}
+  }
+});
+showHome();
+</script>
