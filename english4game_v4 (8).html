@@ -1,0 +1,1251 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>스트로베리엘리펀트 영어4 게임</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Nanum Gothic', 'Apple SD Gothic Neo', sans-serif;
+  background: linear-gradient(135deg, #fff0f5 0%, #ffe0f0 50%, #ffd6e8 100%);
+  min-height: 100vh;
+}
+
+/* ── 공통 화면 ── */
+.screen { display: none; width: 100%; height: 100vh; position: relative; overflow: hidden; }
+.screen.active { display: flex; flex-direction: column; align-items: center; justify-content: center; }
+
+/* ── 공통 오버레이 (body 최상위) ── */
+.overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.6);
+  align-items: center; justify-content: center;
+  z-index: 9999;
+  display: none;
+}
+.overlay.show { display: flex; }
+.overlay-box {
+  background: #fff;
+  border-radius: 24px;
+  padding: 36px 40px;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+  max-width: 380px;
+  width: 90%;
+}
+.overlay-box h2 { font-size: 1.9rem; margin-bottom: 10px; }
+.overlay-box p  { color: #666; margin-bottom: 18px; font-size: 0.95rem; }
+.overlay-box .earned { font-size: 1.2rem; margin-bottom: 22px; white-space: pre-line; line-height: 1.7; }
+
+.btn-primary {
+  background: linear-gradient(135deg, #ff6fa3, #ff3d7f);
+  color: #fff; border: none; border-radius: 14px;
+  padding: 12px 28px; font-size: 1rem; font-weight: 700;
+  cursor: pointer; margin: 5px;
+}
+.btn-secondary {
+  background: #f0f0f0; color: #555; border: none; border-radius: 14px;
+  padding: 12px 28px; font-size: 1rem; font-weight: 700;
+  cursor: pointer; margin: 5px;
+}
+
+/* ── 메인 메뉴 ── */
+#mainMenu {
+  background: linear-gradient(160deg, #ff6fa3 0%, #ff9ac1 40%, #ffb8d4 100%);
+}
+.main-title   { font-size: 2rem; font-weight: 900; color: #fff; text-shadow: 0 3px 8px rgba(200,0,80,.3); margin-bottom: 8px; letter-spacing: 1px; }
+.main-subtitle{ font-size: 1rem; color: rgba(255,255,255,.85); margin-bottom: 36px; }
+.menu-cards   { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; }
+.menu-card {
+  background: #fff; border-radius: 20px; padding: 26px 28px;
+  width: 190px; text-align: center; cursor: pointer;
+  box-shadow: 0 8px 24px rgba(200,0,80,.18);
+  transition: transform .2s, box-shadow .2s;
+}
+.menu-card:hover { transform: translateY(-6px); box-shadow: 0 14px 32px rgba(200,0,80,.28); }
+.menu-card .icon { font-size: 2.8rem; margin-bottom: 10px; }
+.menu-card .name { font-size: 1rem; font-weight: 700; color: #d63584; margin-bottom: 5px; }
+.menu-card .desc { font-size: .78rem; color: #888; line-height: 1.4; }
+.strawberry-count {
+  margin-top: 26px;
+  background: rgba(255,255,255,.3); border-radius: 50px;
+  padding: 10px 24px; font-size: 1.1rem; color: #fff; font-weight: 700;
+}
+
+/* ── 게임1: 단어 매칭 ── */
+#game1 { background: linear-gradient(135deg,#fff8fc 0%,#ffe8f4 100%); padding: 12px 16px; justify-content: flex-start; }
+.game-header {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 12px; width: 100%; max-width: 800px;
+}
+.back-btn {
+  background: #ff6fa3; color: #fff; border: none; border-radius: 10px;
+  padding: 6px 14px; font-size: .85rem; cursor: pointer; font-weight: 700; white-space: nowrap;
+}
+.game-title { font-size: 1rem; font-weight: 800; color: #d63584; flex: 1; }
+.score-box  { background: #ff6fa3; color: #fff; border-radius: 10px; padding: 6px 14px; font-weight: 700; font-size: .85rem; white-space: nowrap; }
+
+.matching-area {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  width: 100%; max-width: 800px;
+}
+.picture-area, .word-area { display: flex; flex-direction: column; gap: 6px; }
+.pic-card, .word-card {
+  padding: 8px 12px; border-radius: 10px;
+  cursor: pointer; border: 2px solid #ffb8d4; background: #fff;
+  transition: all .15s; text-align: center; user-select: none;
+  height: 44px; display: flex; align-items: center; justify-content: center;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  font-size: .9rem; font-weight: 600; box-sizing: border-box;
+}
+.pic-card { font-size: 1.3rem; }
+.pic-card.selected, .word-card.selected { border-color: #ff6fa3; background: #fff0f8; transform: scale(1.04); }
+.pic-card.matched,  .word-card.matched  { border-color: #4caf50; background: #f0fff4; opacity: .55; pointer-events: none; }
+.pic-card.wrong,    .word-card.wrong    { border-color: #f44336; background: #fff3f3; animation: shake .3s; }
+@keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }
+
+/* ── 단어 관리 패널 ── */
+#wordMgr {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,.55);
+  z-index: 9999; display: none;
+  align-items: center; justify-content: center;
+}
+#wordMgr.show { display: flex; }
+.mgr-box {
+  background: #fff; border-radius: 22px; padding: 28px 30px;
+  width: min(480px, 94vw); max-height: 88vh; overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0,0,0,.25);
+}
+.mgr-box h3 { font-size: 1.3rem; font-weight: 800; color: #d63584; margin-bottom: 16px; }
+.add-row { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+.add-row input {
+  flex: 1; min-width: 80px; padding: 9px 12px; border-radius: 10px;
+  border: 2px solid #ffb8d4; font-size: .9rem; outline: none;
+}
+.add-row input:focus { border-color: #ff6fa3; }
+.add-row button { background: #ff6fa3; color: #fff; border: none; border-radius: 10px; padding: 9px 14px; font-weight: 700; cursor: pointer; font-size:.9rem; }
+.word-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+.word-row {
+  display: flex; align-items: center; gap: 10px;
+  background: #fff8fc; border-radius: 10px; padding: 8px 12px;
+  border: 1px solid #ffddee;
+}
+.word-row .em  { font-size: 1.4rem; width: 32px; text-align: center; }
+.word-row .wd  { font-weight: 700; color: #333; flex: 1; }
+.word-row .kr  { color: #888; font-size: .85rem; }
+.word-row .del { background: none; border: none; color: #ccc; cursor: pointer; font-size: 1.1rem; padding: 0 4px; }
+.word-row .del:hover { color: #f44336; }
+.word-row .spk { background: none; border: none; cursor: pointer; font-size: 1rem; padding: 0 4px; color: #aaa; }
+.word-row .spk:hover { color: #ff6fa3; }
+.mgr-footer { display: flex; justify-content: flex-end; gap: 8px; }
+
+/* ── 게임2: 단어 캐처 ── */
+#game2 { padding: 0; }
+#catchCanvas { display: block; touch-action: none; }
+#g2ui {
+  position: absolute; top: 0; left: 0; right: 0;
+  pointer-events: none; z-index: 10; padding: 10px 14px;
+  display: flex; align-items: center; gap: 10px;
+}
+#g2ui .back-btn { pointer-events: all; }
+.g2score { background: rgba(255,255,255,.15); color: #fff; border-radius: 10px; padding: 6px 12px; font-weight: 700; font-size:.9rem; }
+.g2life  { background: rgba(255,80,120,.3); color: #ff8cb0; border-radius: 10px; padding: 6px 12px; font-weight: 700; font-size:.9rem; }
+.g2timer { background: rgba(255,200,0,.2); color: #ffd700; border-radius: 10px; padding: 6px 12px; font-weight: 700; font-size:.9rem; margin-left: auto; }
+
+#targetDisplay {
+  position: absolute; top: 52px; left: 50%; transform: translateX(-50%);
+  background: rgba(255,255,255,.12); border: 2px solid rgba(255,200,100,.4);
+  border-radius: 16px; padding: 8px 18px;
+  display: flex; align-items: center; gap: 12px;
+  pointer-events: all; z-index: 10; cursor: pointer;
+}
+#targetDisplay .t-emoji { font-size: 2rem; }
+#targetDisplay .t-word  { font-size: 1rem; font-weight: 800; color: #fff; }
+#targetDisplay .t-hint  { font-size: .75rem; color: rgba(255,255,255,.5); }
+#targetDisplay .t-spk   { font-size: 1.1rem; }
+
+#g2Start, #g2Over {
+  position: absolute; inset: 0;
+  background: rgba(10,0,30,.88);
+  flex-direction: column; align-items: center; justify-content: center;
+  z-index: 20; color: #fff;
+}
+#g2Start { display: flex; }
+#g2Over  { display: none; }
+#g2Over.show { display: flex; }
+#g2Start h2, #g2Over h2 { font-size: 1.8rem; margin-bottom: 10px; }
+#g2Start p { color: rgba(255,255,255,.65); margin-bottom: 4px; font-size:.88rem; }
+.cost        { font-size: 1.1rem; color: #ff8cb0; margin: 14px 0; }
+.strawberry-now { font-size: 1.2rem; color: #ffd700; margin-bottom: 18px; }
+.final-score { font-size: 1.3rem; color: #ffd700; margin-bottom: 8px; }
+.earned-s    { font-size: 1.1rem; color: #ff8cb0; margin-bottom: 22px; }
+</style>
+</head>
+<body>
+
+<!-- ══ 공통 오버레이들 (body 최상위) ══ -->
+
+<!-- 게임1 결과 -->
+<div class="overlay" id="matchResult">
+  <div class="overlay-box">
+    <h2 id="matchResultTitle">🎉</h2>
+    <p  id="matchResultMsg"></p>
+    <div class="earned" id="matchEarned"></div>
+    <button class="btn-primary"   onclick="overlayClose('matchResult'); startGame1()">다시 하기</button>
+    <button class="btn-secondary" onclick="overlayClose('matchResult'); goMenu()">메뉴로</button>
+  </div>
+</div>
+
+<!-- 단어 관리 패널 -->
+<div id="wordMgr">
+  <div class="mgr-box">
+    <h3>📝 단어 목록 관리</h3>
+    <div class="add-row">
+      <input id="inEmoji" placeholder="그림 (예: 🐙)" maxlength="4">
+      <input id="inWord"  placeholder="영어 단어" maxlength="30">
+      <input id="inKr"    placeholder="한국어 뜻" maxlength="20">
+      <button onclick="addWord()">+ 추가</button>
+    </div>
+    <div class="word-list" id="wordListEl"></div>
+    <div class="mgr-footer">
+      <button class="btn-secondary" onclick="closeMgr()">닫기</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ 메인 메뉴 ══ -->
+<div id="mainMenu" class="screen active">
+  <div class="main-title">🍓 스트로베리엘리펀트</div>
+  <div class="main-subtitle">영어4 단어 게임 모음</div>
+  <div class="menu-cards">
+    <div class="menu-card" onclick="startGame1()">
+      <div class="icon">🃏</div>
+      <div class="name">단어 매칭</div>
+      <div class="desc">그림과 단어를 연결해요!<br>딸기를 모아요 🍓</div>
+    </div>
+    <div class="menu-card" onclick="tryStartGame2()">
+      <div class="icon">🧺</div>
+      <div class="name">단어 캐처</div>
+      <div class="desc">떨어지는 단어를<br>바구니로 받아요!</div>
+    </div>
+    <div class="menu-card" onclick="startGame3()">
+      <div class="icon">🧩</div>
+      <div class="name">문장 퀴즈</div>
+      <div class="desc">듣고·보고·읽고 맞혀요!<br>딸기를 모아요 🍓</div>
+    </div>
+    <div class="menu-card" onclick="openMgr()">
+      <div class="icon">📝</div>
+      <div class="name">단어 추가</div>
+      <div class="desc">단어를 직접 추가하고<br>발음을 들어봐요!</div>
+    </div>
+  </div>
+  <div class="strawberry-count">🍓 보유 딸기: <span id="menuSC">0</span>개</div>
+</div>
+
+<!-- ══ 게임1: 단어 매칭 ══ -->
+<div id="game1" class="screen">
+  <div class="game-header">
+    <button class="back-btn" onclick="goMenu()">← 메뉴</button>
+    <div class="game-title">🃏 단어 매칭 게임</div>
+    <button class="back-btn" style="background:#a78bfa;" onclick="openMgr()">📝 단어 관리</button>
+    <div class="score-box">🍓 <span id="g1score">0</span></div>
+  </div>
+  <div class="matching-area">
+    <div class="picture-area" id="picArea"></div>
+    <div class="word-area"    id="wordArea"></div>
+  </div>
+</div>
+
+<!-- ══ 게임2: 단어 캐처 ══ -->
+<div id="game2" class="screen">
+  <canvas id="catchCanvas" tabindex="0" style="outline:none;"></canvas>
+
+  <div id="g2ui">
+    <button class="back-btn" onclick="goMenu()">← 메뉴</button>
+    <div class="g2score">점수 <span id="g2scoreVal">0</span></div>
+    <div class="g2life"><span id="g2lifeVal">❤️❤️❤️❤️❤️</span></div>
+    <div class="g2timer">⏱ <span id="g2timerVal">60</span>s</div>
+  </div>
+
+  <div id="targetDisplay" onclick="speakWord(targetItem && targetItem.word)">
+    <span class="t-emoji" id="targetEmoji">🍎</span>
+    <span class="t-spk">🔊</span>
+  </div>
+
+  <div id="g2Start">
+    <div style="font-size:3rem;margin-bottom:12px;">🧺</div>
+    <h2>단어 캐처</h2>
+    <p>하늘에서 떨어지는 단어 중</p>
+    <p>그림에 맞는 단어를 바구니로 받으세요!</p>
+    <p style="margin-top:10px;font-size:.82rem;color:rgba(255,255,255,.4);">← → 키 또는 화면 드래그로 바구니 이동</p>
+    <div class="cost">입장료: 🍓 15개</div>
+    <div class="strawberry-now">보유 딸기: <span id="g2StartSC">0</span>개</div>
+    <button class="btn-primary" onclick="beginCatchGame()">게임 시작!</button>
+    <button class="btn-secondary" style="margin-top:8px;" onclick="goMenu()">돌아가기</button>
+  </div>
+
+  <div id="g2Over">
+    <div style="font-size:2.5rem;margin-bottom:8px;">🎮</div>
+    <h2 id="g2OverTitle">게임 종료!</h2>
+    <div class="final-score">점수: <span id="g2FinalScore">0</span>점</div>
+    <div class="earned-s" id="g2EarnedS"></div>
+    <button class="btn-primary"   onclick="restartCatch()">다시 하기 🍓×3</button>
+    <button class="btn-secondary" style="margin-top:8px;" onclick="goMenu()">메뉴로</button>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════
+//  단어 데이터 (localStorage로 영속 저장)
+// ══════════════════════════════════════════════════════
+// 천재교육 영어4 (함순애) 2022 개정 단원별 핵심 단어
+// 천재교육 영어4 (함순애) – 그림으로 직관적으로 표현 가능한 단어만 선별
+const DEFAULT_WORDS = [
+  // Lesson 1 – 인사·시간대
+  {emoji:'🌅', word:'morning',    kr:'아침'},
+  {emoji:'☀️', word:'afternoon',  kr:'오후'},
+  {emoji:'🌆', word:'evening',    kr:'저녁'},
+  {emoji:'🌙', word:'night',      kr:'밤'},
+  {emoji:'🎒', word:'bag',        kr:'가방'},
+  {emoji:'👫', word:'friend',     kr:'친구'},
+  // Lesson 2 – 감정
+  {emoji:'😡', word:'angry',      kr:'화난'},
+  {emoji:'😄', word:'happy',      kr:'행복한'},
+  {emoji:'😢', word:'sad',        kr:'슬픈'},
+  {emoji:'😴', word:'sleepy',     kr:'졸린'},
+  {emoji:'🥱', word:'tired',      kr:'피곤한'},
+  {emoji:'🥵', word:'thirsty',    kr:'목마른'},
+  {emoji:'💧', word:'water',      kr:'물'},
+  // Lesson 3 – 행동·장소
+  {emoji:'🥤', word:'drink',      kr:'마시다'},
+  {emoji:'🍴', word:'eat',        kr:'먹다'},
+  {emoji:'🫸', word:'push',       kr:'밀다'},
+  {emoji:'💬', word:'talk',       kr:'말하다'},
+  {emoji:'❤️', word:'love',       kr:'사랑하다'},
+  {emoji:'🏠', word:'house',      kr:'집'},
+  {emoji:'👆', word:'touch',      kr:'만지다'},
+  {emoji:'🦵', word:'kick',       kr:'발로 차다'},
+  // Lesson 4 – 스포츠
+  {emoji:'⚾', word:'baseball',   kr:'야구'},
+  {emoji:'🏀', word:'basketball', kr:'농구'},
+  {emoji:'⚽', word:'soccer',     kr:'축구'},
+  {emoji:'🎾', word:'tennis',     kr:'테니스'},
+  {emoji:'🏸', word:'badminton',  kr:'배드민턴'},
+  {emoji:'🤒', word:'sick',       kr:'아픈'},
+  // Lesson 5 – 음식
+  {emoji:'🍞', word:'bread',      kr:'빵'},
+  {emoji:'🍗', word:'chicken',    kr:'치킨'},
+  {emoji:'🍜', word:'noodles',    kr:'국수'},
+  {emoji:'🍵', word:'soup',       kr:'수프'},
+  {emoji:'🥗', word:'salad',      kr:'샐러드'},
+  {emoji:'🍨', word:'icecream',   kr:'아이스크림'},
+  {emoji:'🔥', word:'hot',        kr:'뜨거운'},
+  {emoji:'🥛', word:'milk',       kr:'우유'},
+  {emoji:'🍕', word:'pizza',      kr:'피자'},
+  // Lesson 6 – 위치·물건
+  {emoji:'🛏️', word:'bed',        kr:'침대'},
+  {emoji:'📦', word:'box',        kr:'상자'},
+  {emoji:'🚌', word:'bus',        kr:'버스'},
+  {emoji:'🪑', word:'chair',      kr:'의자'},
+  {emoji:'🪭', word:'fan',        kr:'부채'},
+  {emoji:'⬇️', word:'under',      kr:'아래에'},
+  {emoji:'🧢', word:'cap',        kr:'모자'},
+];
+
+const WORD_VERSION = 'v7'; // 단어 목록 버전 (바뀌면 localStorage 초기화)
+function loadWords() {
+  try {
+    const ver = localStorage.getItem('se_words_ver');
+    const raw = localStorage.getItem('se_words');
+    if (ver === WORD_VERSION && raw) return JSON.parse(raw);
+    // 버전 다르면 기본 단어로 초기화
+    localStorage.setItem('se_words_ver', WORD_VERSION);
+    localStorage.removeItem('se_words');
+    return [...DEFAULT_WORDS];
+  } catch { return [...DEFAULT_WORDS]; }
+}
+function saveWords() {
+  try { localStorage.setItem('se_words', JSON.stringify(WORDS)); } catch {}
+}
+let WORDS = loadWords();
+
+// ══════════════════════════════════════════════════════
+//  TTS 발음
+// ══════════════════════════════════════════════════════
+function speakWord(word) {
+  if (!word) return;
+  if ('speechSynthesis' in window) {
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(word);
+    u.lang = 'en-US'; u.rate = 0.85;
+    window.speechSynthesis.speak(u);
+  }
+}
+
+// ══════════════════════════════════════════════════════
+//  딸기 (점수 화폐)
+// ══════════════════════════════════════════════════════
+let strawberries = 0;
+function addStrawberry(n) { strawberries = Math.max(0, strawberries + n); updateSC(); }
+function spendStrawberry(n) { if (strawberries < n) return false; strawberries -= n; updateSC(); return true; }
+function updateSC() {
+  document.getElementById('menuSC').textContent    = strawberries;
+  document.getElementById('g2StartSC').textContent = strawberries;
+}
+
+// ══════════════════════════════════════════════════════
+//  화면 전환 & 오버레이
+// ══════════════════════════════════════════════════════
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+function overlayShow(id) { document.getElementById(id).classList.add('show'); }
+function overlayClose(id){ document.getElementById(id).classList.remove('show'); }
+
+function goMenu() {
+  catchStop();
+  // 모든 오버레이 닫기
+  ['matchResult', 'wordMgr'].forEach(overlayClose);
+  showScreen('mainMenu');
+  updateSC();
+}
+
+// ══════════════════════════════════════════════════════
+//  단어 관리 패널
+// ══════════════════════════════════════════════════════
+function openMgr() { renderWordList(); overlayShow('wordMgr'); }
+function closeMgr() { overlayClose('wordMgr'); }
+
+function renderWordList() {
+  const el = document.getElementById('wordListEl');
+  el.innerHTML = '';
+  WORDS.forEach((w, i) => {
+    const row = document.createElement('div');
+    row.className = 'word-row';
+    row.innerHTML = `
+      <span class="em">${w.emoji}</span>
+      <span class="wd">${w.word}</span>
+      <span class="kr">${w.kr}</span>
+      <button class="spk" onclick="speakWord('${w.word}')" title="발음 듣기">🔊</button>
+      ${i >= DEFAULT_WORDS.length
+        ? `<button class="del" onclick="deleteWord(${i})" title="삭제">✕</button>`
+        : `<span style="width:24px"></span>`}
+    `;
+    el.appendChild(row);
+  });
+}
+
+function addWord() {
+  const emoji = document.getElementById('inEmoji').value.trim();
+  const word  = document.getElementById('inWord').value.trim().toLowerCase();
+  const kr    = document.getElementById('inKr').value.trim();
+  if (!emoji || !word || !kr) { alert('세 칸을 모두 채워주세요!'); return; }
+  if (WORDS.find(w => w.word === word)) { alert('이미 있는 단어예요!'); return; }
+  WORDS.push({emoji, word, kr});
+  saveWords();
+  document.getElementById('inEmoji').value = '';
+  document.getElementById('inWord').value  = '';
+  document.getElementById('inKr').value    = '';
+  speakWord(word);
+  renderWordList();
+}
+
+function deleteWord(i) {
+  if (!confirm(`'${WORDS[i].word}' 을 삭제할까요?`)) return;
+  WORDS.splice(i, 1);
+  saveWords();
+  renderWordList();
+}
+
+// ══════════════════════════════════════════════════════
+//  게임1: 단어 매칭
+// ══════════════════════════════════════════════════════
+let g1score = 0, g1selected = null, g1pairs = [], g1matchedCount = 0;
+
+function startGame1() {
+  showScreen('game1');
+  overlayClose('matchResult');
+  g1score = 0; g1selected = null; g1matchedCount = 0;
+  document.getElementById('g1score').textContent = 0;
+
+  const count = Math.min(8, WORDS.length);
+  g1pairs = [...WORDS].sort(() => Math.random() - .5).slice(0, count);
+
+  const picArea  = document.getElementById('picArea');
+  const wordArea = document.getElementById('wordArea');
+  picArea.innerHTML = ''; wordArea.innerHTML = '';
+
+  const picOrder  = [...g1pairs].sort(() => Math.random() - .5);
+  const wordOrder = [...g1pairs].sort(() => Math.random() - .5);
+
+  picOrder.forEach(item => {
+    const d = document.createElement('div');
+    d.className = 'pic-card'; d.textContent = item.emoji;
+    d.dataset.word = item.word; d.dataset.type = 'pic';
+    d.onclick = () => selectCard(d);
+    picArea.appendChild(d);
+  });
+  wordOrder.forEach(item => {
+    const d = document.createElement('div');
+    d.className = 'word-card'; d.textContent = item.word;
+    d.dataset.word = item.word; d.dataset.type = 'word';
+    d.onclick = () => { speakWord(item.word); selectCard(d); };
+    wordArea.appendChild(d);
+  });
+}
+
+function selectCard(el) {
+  if (el.classList.contains('matched') || el.classList.contains('wrong')) return;
+  if (!g1selected) { el.classList.add('selected'); g1selected = el; return; }
+  if (g1selected.dataset.type === el.dataset.type) {
+    g1selected.classList.remove('selected'); el.classList.add('selected');
+    g1selected = el; return;
+  }
+  if (g1selected.dataset.word === el.dataset.word) {
+    g1selected.classList.replace('selected','matched');
+    el.classList.add('matched');
+    g1matchedCount++; g1score += 10;
+    document.getElementById('g1score').textContent = g1score;
+    g1selected = null;
+    if (g1matchedCount === g1pairs.length) {
+      const earned = Math.floor(g1score / 10);
+      addStrawberry(earned);
+      setTimeout(() => {
+        document.getElementById('matchResultTitle').textContent = '🎉 완성!';
+        document.getElementById('matchResultMsg').textContent   = `${g1score}점으로 모두 맞췄어요!`;
+        document.getElementById('matchEarned').textContent      = `🍓 ${earned}개 획득!\n현재 보유: ${strawberries}개`;
+        overlayShow('matchResult');
+      }, 400);
+    }
+  } else {
+    const prev = g1selected;
+    g1selected.classList.remove('selected'); g1selected = null;
+    prev.classList.add('wrong'); el.classList.add('wrong');
+    setTimeout(() => { prev.classList.remove('wrong'); el.classList.remove('wrong'); }, 600);
+    g1score = Math.max(0, g1score - 2);
+    document.getElementById('g1score').textContent = g1score;
+  }
+}
+
+// ══════════════════════════════════════════════════════
+//  게임2: 단어 캐처
+// ══════════════════════════════════════════════════════
+const CATCH_COST = 15;
+let canvas, ctx;
+let basketX, basketY, basketW = 100, basketH = 44;
+let falling = [];
+let g2score = 0, g2life = 3, g2timer = 60;
+let catchRunning = false, catchAnimId = null;
+let spawnIntv = null, timerIntv = null;
+let targetItem = null;
+let moveLeft = false, moveRight = false, touchTargetX = null;
+let lastTs = 0, effects = [];
+let stars = [];
+const COLORS = ['#ff6fa3','#64b5f6','#81c784','#ffb74d','#ba68c8','#4dd0e1','#f06292','#aed581'];
+
+function tryStartGame2() {
+  showScreen('game2');
+  updateSC();
+  document.getElementById('g2Start').style.display = 'flex';
+  document.getElementById('g2Over').classList.remove('show');
+  canvas = document.getElementById('catchCanvas');
+  ctx = canvas.getContext('2d');
+  resizeCanvas();
+  initStars(); drawBg();
+}
+
+function beginCatchGame() {
+  if (!spendStrawberry(CATCH_COST)) { alert('딸기가 부족해요! 단어 매칭에서 딸기를 모아오세요 🍓'); return; }
+  document.getElementById('g2Start').style.display = 'none';
+  initCatch();
+}
+
+function restartCatch() {
+  document.getElementById('g2Over').classList.remove('show');
+  if (!spendStrawberry(CATCH_COST)) { alert('딸기가 부족해요! 🍓'); goMenu(); return; }
+  initCatch();
+}
+
+function initCatch() {
+  resizeCanvas();
+  basketX = canvas.width / 2 - basketW / 2;
+  basketY = canvas.height - basketH - 20;
+  falling = []; effects = [];
+  g2score = 0; g2life = 5; g2timer = 90;
+  catchRunning = true;
+  newTarget();
+  clearInterval(spawnIntv); spawnIntv = setInterval(spawnWord, 2000);
+  clearInterval(timerIntv); timerIntv = setInterval(() => {
+    if (!catchRunning) return;
+    g2timer--;
+    document.getElementById('g2timerVal').textContent = g2timer;
+    if (g2timer <= 0) endCatch(true);
+  }, 1000);
+  updateG2HUD();
+  lastTs = performance.now();
+  if (catchAnimId) cancelAnimationFrame(catchAnimId);
+  catchAnimId = requestAnimationFrame(catchLoop);
+  // 키보드 입력을 위해 포커스 이동 (버튼 포커스 제거)
+  if (document.activeElement) document.activeElement.blur();
+  canvas.focus();
+}
+
+function newTarget() {
+  targetItem = WORDS[Math.floor(Math.random() * WORDS.length)];
+  document.getElementById('targetEmoji').textContent = targetItem.emoji;
+  speakWord(targetItem.word);
+  // 기존 낙하 단어 모두 제거
+  falling = [];
+  // 정답 1개 + 오답 2~3개를 랜덤 타이밍으로 스폰
+  const distractors = WORDS.filter(w => w.word !== targetItem.word)
+    .sort(() => Math.random() - .5).slice(0, 3);
+  const allItems = [
+    { item: targetItem, correct: true },
+    ...distractors.map(d => ({ item: d, correct: false }))
+  ].sort(() => Math.random() - .5); // 순서 완전 랜덤
+
+  let delay = 600;
+  allItems.forEach(({ item, correct }) => {
+    setTimeout(() => { if (catchRunning) spawnSpecific(item, correct); }, delay);
+    delay += Math.floor(300 + Math.random() * 400); // 300~700ms 랜덤 간격
+  });
+}
+
+function spawnSpecific(item, isCorrect) {
+  if (!catchRunning || !canvas) return;
+  const fs = Math.max(15, Math.min(20, canvas.width * 0.028));
+  ctx.font = `bold ${fs}px sans-serif`;
+  const tw = ctx.measureText(item.word).width + 32;
+  const th = fs + 24;
+  const stage = Math.min(8, Math.floor(g2score / 10));
+  const baseSpeed = 1.8 + stage * 0.4;
+  const correctColor = stage < 3 ? '#ffd700' : COLORS[Math.floor(Math.random() * COLORS.length)];
+  falling.push({
+    x: Math.random() * (canvas.width - tw - 20) + 10,
+    y: -th, word: item.word,
+    correct: isCorrect,
+    speed: baseSpeed + Math.random() * 0.6,
+    color: isCorrect ? correctColor : COLORS[Math.floor(Math.random() * COLORS.length)],
+    w: tw, h: th, fs,
+  });
+}
+
+function spawnWord() {
+  if (!catchRunning || WORDS.length < 2) return;
+  // 정답 단어가 화면에 없으면 반드시 정답 스폰
+  const hasCorrect = falling.some(f => f.correct);
+  const isCorrect = !hasCorrect || Math.random() < 0.28;
+  const item = isCorrect ? targetItem
+    : WORDS.filter(w => w.word !== targetItem.word)[Math.floor(Math.random() * (WORDS.length - 1))];
+  spawnSpecific(item, isCorrect);
+}
+
+function catchLoop(ts) {
+  if (!catchRunning) return;
+  const dt = Math.min((ts - lastTs) / 16.67, 3); lastTs = ts;
+
+  if (moveLeft)  basketX -= 18 * dt;
+  if (moveRight) basketX += 18 * dt;
+  if (touchTargetX !== null) basketX += (touchTargetX - basketW/2 - basketX) * 0.18;
+  basketX = Math.max(0, Math.min(canvas.width - basketW, basketX));
+
+  drawBg();
+  drawBasket();
+
+  // 현재 단계 표시
+  const stage = Math.min(8, Math.floor(g2score / 10));
+  ctx.save();
+  ctx.textAlign = 'right';
+  ctx.fillStyle = stage >= 6 ? '#ff6060' : stage >= 3 ? '#ffcc00' : '#aaffaa';
+  ctx.font = 'bold 13px sans-serif';
+  ctx.fillText('STAGE ' + (stage + 1) + '  ' + '🔥'.repeat(Math.min(stage + 1, 5)), canvas.width - 16, canvas.height - 12);
+  ctx.restore();
+
+  let gotCorrect = false;
+  let gotWrong   = false;
+  let missed     = false;
+
+  for (let i = falling.length - 1; i >= 0; i--) {
+    const f = falling[i];
+    f.y += f.speed * dt;
+
+    // 바구니 충돌
+    if (f.y + f.h >= basketY && f.y <= basketY + basketH &&
+        f.x + f.w >= basketX && f.x <= basketX + basketW) {
+      falling.splice(i, 1);
+      if (f.correct) {
+        g2score += 10;
+        pushFx(f.x + f.w/2, basketY, '✨ +10', '#ffd700');
+        gotCorrect = true;
+      } else {
+        g2life--;
+        pushFx(f.x + f.w/2, basketY, '❌ -1❤️', '#ff4444');
+        if (g2life <= 0) { endCatch(false); return; }
+        gotWrong = true;
+      }
+      updateG2HUD();
+      continue;
+    }
+
+    // 바닥 이탈
+    if (f.y > canvas.height + 10) {
+      if (f.correct) {
+        pushFx(canvas.width/2, canvas.height - 70, '놓쳤어요! 다음 목표!', '#ff8c00');
+        missed = true;
+      }
+      falling.splice(i, 1);
+      continue;
+    }
+
+    drawFWord(f);
+  }
+
+  drawFx(dt);
+
+  // 루프 끝난 뒤 newTarget 호출 (루프 중 배열 교체 방지)
+  if (gotCorrect || missed) newTarget();
+
+  catchAnimId = requestAnimationFrame(catchLoop);
+}
+
+function drawBg() {
+  const g = ctx.createLinearGradient(0,0,0,canvas.height);
+  g.addColorStop(0,'#0d0520'); g.addColorStop(1,'#1a0540');
+  ctx.fillStyle = g; ctx.fillRect(0,0,canvas.width,canvas.height);
+  stars.forEach(s => {
+    ctx.beginPath();
+    ctx.arc(s.x*canvas.width, s.y*canvas.height, s.r, 0, Math.PI*2);
+    ctx.fillStyle = `rgba(255,255,255,${0.3+s.a*0.7})`; ctx.fill();
+  });
+}
+
+function drawFWord(f) {
+  const r = f.h/2;
+  ctx.save();
+  ctx.beginPath();
+  ctx.moveTo(f.x+r,f.y); ctx.lineTo(f.x+f.w-r,f.y);
+  ctx.arcTo(f.x+f.w,f.y,f.x+f.w,f.y+f.h,r);
+  ctx.lineTo(f.x+f.w,f.y+f.h-r);
+  ctx.arcTo(f.x+f.w,f.y+f.h,f.x,f.y+f.h,r);
+  ctx.lineTo(f.x+r,f.y+f.h);
+  ctx.arcTo(f.x,f.y+f.h,f.x,f.y,r);
+  ctx.lineTo(f.x,f.y+r);
+  ctx.arcTo(f.x,f.y,f.x+f.w,f.y,r);
+  ctx.closePath();
+  ctx.fillStyle   = f.correct ? 'rgba(255,215,0,.2)' : 'rgba(255,255,255,.09)';
+  ctx.fill();
+  ctx.strokeStyle = f.color; ctx.lineWidth = f.correct ? 2.5 : 1.5; ctx.stroke();
+  ctx.fillStyle = f.color;
+  ctx.font = `bold ${f.fs}px sans-serif`;
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText(f.word, f.x+f.w/2, f.y+f.h/2);
+  ctx.restore();
+}
+
+function drawBasket() {
+  const bx=basketX, by=basketY, bw=basketW, bh=basketH;
+  ctx.save();
+
+  // 외부 발광 효과
+  ctx.shadowColor='#00ffff';
+  ctx.shadowBlur=28;
+
+  // 바구니 몸통 (사다리꼴 – 위가 넓고 아래가 좁음)
+  const tw = bw;         // 윗면 너비
+  const bw2 = bw * 0.7; // 아랫면 너비
+  const ox = (bw - bw2) / 2;
+
+  // 바닥 채우기 (밝은 황토색)
+  ctx.beginPath();
+  ctx.moveTo(bx,      by);
+  ctx.lineTo(bx+tw,   by);
+  ctx.lineTo(bx+ox+bw2, by+bh);
+  ctx.lineTo(bx+ox,   by+bh);
+  ctx.closePath();
+  ctx.fillStyle = '#c8860a';
+  ctx.fill();
+
+  // 바구니 줄무늬 (가로)
+  ctx.shadowBlur = 0;
+  const stripeCount = 4;
+  for (let i = 1; i < stripeCount; i++) {
+    const t = i / stripeCount;
+    const lx = bx + ox * t;
+    const rx = bx + bw - ox * t;
+    const ly = by + bh * t;
+    ctx.beginPath();
+    ctx.moveTo(lx, ly); ctx.lineTo(rx, ly);
+    ctx.strokeStyle = 'rgba(255,200,80,0.35)';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+  }
+
+  // 바구니 테두리
+  ctx.beginPath();
+  ctx.moveTo(bx,      by);
+  ctx.lineTo(bx+tw,   by);
+  ctx.lineTo(bx+ox+bw2, by+bh);
+  ctx.lineTo(bx+ox,   by+bh);
+  ctx.closePath();
+  ctx.strokeStyle = '#ffdd44';
+  ctx.lineWidth = 3.5;
+  ctx.stroke();
+
+  // 윗면 테두리 강조 (입구)
+  ctx.beginPath();
+  ctx.moveTo(bx - 4, by);
+  ctx.lineTo(bx + tw + 4, by);
+  ctx.strokeStyle = '#ffe066';
+  ctx.lineWidth = 6;
+  ctx.lineCap = 'round';
+  ctx.stroke();
+
+  // 손잡이 (아치)
+  ctx.beginPath();
+  ctx.arc(bx + bw/2, by, bw * 0.28, Math.PI, 0);
+  ctx.strokeStyle = '#ffdd44';
+  ctx.lineWidth = 5;
+  ctx.shadowColor = '#ffdd44';
+  ctx.shadowBlur = 10;
+  ctx.stroke();
+
+  ctx.restore();
+}
+
+function pushFx(x,y,text,color) { effects.push({x,y,text,color,life:1}); }
+function drawFx(dt) {
+  effects = effects.filter(e=>e.life>0);
+  effects.forEach(e=>{
+    ctx.save(); ctx.globalAlpha=e.life;
+    ctx.fillStyle=e.color; ctx.font='bold 18px sans-serif'; ctx.textAlign='center';
+    ctx.fillText(e.text,e.x,e.y-(1-e.life)*55);
+    ctx.restore(); e.life-=0.04*dt;
+  });
+}
+
+function initStars() {
+  stars=[];
+  for(let i=0;i<80;i++) stars.push({x:Math.random(),y:Math.random(),r:Math.random()*1.5+.3,a:Math.random()});
+}
+
+function updateG2HUD() {
+  document.getElementById('g2scoreVal').textContent = g2score;
+  document.getElementById('g2lifeVal').textContent  = '❤️'.repeat(Math.max(0,g2life));
+  document.getElementById('g2timerVal').textContent = g2timer;
+}
+
+function endCatch(timeUp) {
+  catchRunning = false;
+  clearInterval(spawnIntv); clearInterval(timerIntv);
+  const earned = Math.floor(g2score/10);
+  addStrawberry(earned);
+  document.getElementById('g2OverTitle').textContent  = timeUp ? '⏰ 시간 종료!' : '💔 게임 오버';
+  document.getElementById('g2FinalScore').textContent = g2score;
+  document.getElementById('g2EarnedS').textContent    = earned>0
+    ? `🍓 ${earned}개 획득!\n현재 보유: ${strawberries}개`
+    : '아쉽게도 딸기를 못 얻었어요 😢';
+  document.getElementById('g2Over').classList.add('show');
+}
+
+function catchStop() {
+  catchRunning = false;
+  if(catchAnimId){ cancelAnimationFrame(catchAnimId); catchAnimId=null; }
+  clearInterval(spawnIntv); spawnIntv=null;
+  clearInterval(timerIntv); timerIntv=null;
+}
+
+function resizeCanvas() {
+  if(!canvas) return;
+  canvas.width=window.innerWidth; canvas.height=window.innerHeight;
+  basketY = canvas.height - basketH - 20;
+}
+
+// ── 키보드 ──
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowLeft')  { e.preventDefault(); moveLeft  = true; }
+  if (e.key === 'ArrowRight') { e.preventDefault(); moveRight = true; }
+});
+document.addEventListener('keyup', e => {
+  if (e.key === 'ArrowLeft')  moveLeft  = false;
+  if (e.key === 'ArrowRight') moveRight = false;
+});
+
+// ── 터치 / 마우스 ──
+function getClientX(e){ return e.touches ? e.touches[0].clientX : e.clientX; }
+document.addEventListener('touchstart', e=>{ if(e.target===canvas) touchTargetX=getClientX(e); },{passive:true});
+document.addEventListener('touchmove',  e=>{ if(e.target===canvas) touchTargetX=getClientX(e); },{passive:true});
+document.addEventListener('touchend',   ()=>{ touchTargetX=null; });
+document.addEventListener('mousemove',  e=>{ if(catchRunning && e.target===canvas) touchTargetX=e.clientX; });
+document.addEventListener('mouseleave', ()=>{ touchTargetX=null; });
+
+window.addEventListener('resize', resizeCanvas);
+updateSC();
+</script>
+
+<!-- ══════════════════════════════════════════════════════
+     게임3: 문장 퀴즈 (HTML div 기반)
+══════════════════════════════════════════════════════ -->
+<style>
+#game3 {
+  background: linear-gradient(135deg, #1a0050 0%, #2d0080 50%, #1a0050 100%);
+  padding: 0;
+  justify-content: flex-start;
+}
+#g3wrap {
+  width: 100%; max-width: 600px;
+  padding: 16px 20px;
+  display: flex; flex-direction: column; align-items: center;
+  gap: 14px;
+  margin: 0 auto;
+}
+.g3header {
+  display: flex; align-items: center; gap: 10px;
+  width: 100%;
+}
+.g3header .back-btn { flex-shrink: 0; }
+.g3-info {
+  flex: 1; display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;
+}
+.g3-badge {
+  background: rgba(255,255,255,.15); color: #fff;
+  border-radius: 10px; padding: 5px 12px;
+  font-size: .85rem; font-weight: 700;
+}
+.g3-badge.combo { background: rgba(255,200,0,.25); color: #ffd700; }
+
+/* 진행바 */
+.g3-progress {
+  width: 100%; height: 8px;
+  background: rgba(255,255,255,.12); border-radius: 99px; overflow: hidden;
+}
+.g3-progress-fill {
+  height: 100%; background: linear-gradient(90deg,#a78bfa,#f472b6);
+  border-radius: 99px; transition: width .35s ease;
+}
+
+/* 문제 카드 */
+.g3-card {
+  width: 100%;
+  background: rgba(255,255,255,.09);
+  border: 1.5px solid rgba(255,255,255,.18);
+  border-radius: 20px;
+  padding: 24px 20px;
+  text-align: center;
+  min-height: 160px;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 10px;
+}
+.g3-type-badge {
+  font-size: .75rem; font-weight: 700;
+  padding: 3px 12px; border-radius: 99px; letter-spacing: .5px;
+}
+.g3-type-fill  { background: rgba(167,139,250,.35); color: #c4b5fd; }
+.g3-type-ox    { background: rgba(244,114,182,.35); color: #f9a8d4; }
+.g3-type-listen{ background: rgba(52,211,153,.35);  color: #6ee7b7; }
+
+.g3-sentence {
+  font-size: 1.3rem; font-weight: 700; color: #fff; line-height: 1.5;
+}
+.g3-blank {
+  display: inline-block;
+  border-bottom: 3px solid #a78bfa;
+  min-width: 80px; color: transparent;
+  position: relative; top: 2px;
+}
+.g3-situation { font-size: 2.8rem; line-height: 1; }
+.g3-ox-q { font-size: 1rem; color: rgba(255,255,255,.75); margin-top: 6px; }
+.g3-listen-btn {
+  background: rgba(255,255,255,.15); border: 2px solid rgba(255,255,255,.3);
+  color: #fff; border-radius: 50%; width: 60px; height: 60px;
+  font-size: 1.6rem; cursor: pointer; transition: background .15s;
+  display: flex; align-items: center; justify-content: center;
+}
+.g3-listen-btn:hover { background: rgba(255,255,255,.25); }
+
+/* 선택지 버튼 */
+.g3-choices {
+  width: 100%;
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.g3-choice {
+  background: rgba(255,255,255,.10);
+  border: 2px solid rgba(255,255,255,.2);
+  color: #fff; border-radius: 14px;
+  padding: 14px 10px; font-size: 1rem; font-weight: 700;
+  cursor: pointer; transition: all .15s;
+  text-align: center;
+}
+.g3-choice:hover:not(:disabled) { background: rgba(255,255,255,.2); border-color: rgba(255,255,255,.5); }
+.g3-choice.correct  { background: rgba(52,211,153,.35); border-color: #34d399; color: #6ee7b7; }
+.g3-choice.wrong    { background: rgba(239,68,68,.3);   border-color: #ef4444; color: #fca5a5; }
+.g3-choice:disabled { cursor: default; }
+
+/* OX 전용 */
+.g3-ox-choices { display: flex; gap: 16px; justify-content: center; }
+.g3-ox-btn {
+  width: 90px; height: 90px; border-radius: 50%;
+  font-size: 2.2rem; font-weight: 900; cursor: pointer;
+  border: 3px solid transparent; transition: all .15s;
+}
+.g3-ox-btn.o-btn { background: rgba(52,211,153,.2); color: #34d399; border-color: #34d399; }
+.g3-ox-btn.x-btn { background: rgba(239,68,68,.2);  color: #ef4444;  border-color: #ef4444; }
+.g3-ox-btn:hover:not(:disabled) { transform: scale(1.08); }
+.g3-ox-btn.correct { background: rgba(52,211,153,.5); }
+.g3-ox-btn.wrong   { background: rgba(239,68,68,.5); }
+.g3-ox-btn:disabled { cursor: default; transform: none; }
+
+/* 피드백 */
+.g3-feedback {
+  font-size: 1rem; font-weight: 700; min-height: 24px; color: #ffd700;
+  text-align: center;
+}
+
+/* 결과 오버레이 재사용 */
+</style>
+
+<div id="game3" class="screen">
+  <div id="g3wrap">
+    <div class="g3header">
+      <button class="back-btn" onclick="goMenu()">← 메뉴</button>
+      <div class="g3-info">
+        <div class="g3-badge">문제 <span id="g3qnum">1</span>/10</div>
+        <div class="g3-badge">점수 <span id="g3score">0</span></div>
+        <div class="g3-badge combo" id="g3comboBadge" style="display:none">🔥 <span id="g3combo">0</span> 콤보!</div>
+      </div>
+    </div>
+
+    <div class="g3-progress">
+      <div class="g3-progress-fill" id="g3progFill" style="width:0%"></div>
+    </div>
+
+    <div class="g3-card" id="g3card">
+      <!-- 동적으로 채워짐 -->
+    </div>
+
+    <div id="g3choiceArea"></div>
+
+    <div class="g3-feedback" id="g3feedback"></div>
+  </div>
+</div>
+
+<!-- 게임3 결과 오버레이 (body 최상위) -->
+<div class="overlay" id="g3Result">
+  <div class="overlay-box">
+    <h2 id="g3ResultTitle">🎉</h2>
+    <p  id="g3ResultMsg"></p>
+    <div class="earned" id="g3Earned"></div>
+    <button class="btn-primary"   onclick="overlayClose('g3Result'); startGame3()">다시 하기</button>
+    <button class="btn-secondary" onclick="overlayClose('g3Result'); goMenu()">메뉴로</button>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════
+//  게임3 전용 단어 목록 (추상 단어 – 문장/상황으로 학습)
+// ══════════════════════════════════════════════════════
+const G3_WORDS = [
+  // Lesson 1
+  { word:'name',     kr:'이름',      sentence:'My ___ is Amy.',            situation:'🏷️👤',   ox:{ emoji:'🙋📛', statement:'This means "이름".' } },
+  { word:'meet',     kr:'만나다',    sentence:'Nice to ___ you!',          situation:'🤝😊',   ox:{ emoji:'🤝👋', statement:'This means "만나다".' } },
+  { word:'everyone', kr:'모두',      sentence:'Good morning, ___ !',       situation:'👨‍👩‍👧‍👦🙌', ox:{ emoji:'👥🙌', statement:'This means "모두".' } },
+  { word:'new',      kr:'새로운',    sentence:'She is my ___ friend.',     situation:'✨🆕',   ox:{ emoji:'🆕⭐', statement:'This means "새로운".' } },
+  // Lesson 2
+  { word:'again',    kr:'다시',      sentence:'Try ___ ! You can do it!', situation:'🔄▶️',   ox:{ emoji:'🔁🔄', statement:'This means "다시".' } },
+  { word:'try',      kr:'시도하다',  sentence:'Can you ___ again, Kate?', situation:'💪🎯',   ox:{ emoji:'💪✊', statement:'This means "시도하다".' } },
+  { word:'careful',  kr:'조심하는',  sentence:'Be ___ . It\'s dangerous!',situation:'⚠️😬',   ox:{ emoji:'⚠️🛑', statement:'This means "조심하는".' } },
+  // Lesson 3
+  { word:'welcome',  kr:'환영하다',  sentence:'___ to my house!',         situation:'🎉🏠',   ox:{ emoji:'🎉👐', statement:'This means "환영하다".' } },
+  { word:'enter',    kr:'들어가다',  sentence:'Don\'t ___ here, please.', situation:'🚪➡️',   ox:{ emoji:'🚪🚶', statement:'This means "들어가다".' } },
+  { word:'line',     kr:'줄',        sentence:'Please ___ up here.',      situation:'🚶🚶🚶', ox:{ emoji:'👥📏', statement:'This means "줄".' } },
+  { word:'over',     kr:'넘어',      sentence:'Jump ___ the fence!',      situation:'🏃↗️🌿', ox:{ emoji:'⬆️🏃', statement:'This means "넘어".' } },
+  // Lesson 4
+  { word:'play',     kr:'놀다',      sentence:'Let\'s ___ basketball!',   situation:'🎮😄',   ox:{ emoji:'🎯🎮', statement:'This means "놀다".' } },
+  { word:'bad',      kr:'나쁜',      sentence:'That\'s too ___ . Bye.',   situation:'😞👎',   ox:{ emoji:'👎😞', statement:'This means "나쁜".' } },
+  { word:'busy',     kr:'바쁜',      sentence:'Sorry, I\'m too ___ .',    situation:'📅😓',   ox:{ emoji:'📅⏰', statement:'This means "바쁜".' } },
+  { word:'sound',    kr:'들리다',    sentence:'That ___ s good!',         situation:'👂🎵',   ox:{ emoji:'👂🔊', statement:'This means "들리다".' } },
+  { word:'let',      kr:'허락하다',  sentence:'___ \'s play baseball!',   situation:'🙆✅',   ox:{ emoji:'✅🙆', statement:'This means "허락하다".' } },
+  // Lesson 5
+  { word:'much',     kr:'많은',      sentence:'How ___ do you want?',     situation:'🤏📦',   ox:{ emoji:'📦🔢', statement:'This means "많은".' } },
+  { word:'want',     kr:'원하다',    sentence:'I ___ chicken, please.',   situation:'🙋💭',   ox:{ emoji:'💭🙋', statement:'This means "원하다".' } },
+  { word:'help',     kr:'돕다',      sentence:'Can you ___ me, please?', situation:'🆘🤲',   ox:{ emoji:'🤲🆘', statement:'This means "돕다".' } },
+  { word:'hot',      kr:'뜨거운',    sentence:'Oh, it\'s so ___ !',      situation:'🔥😰',   ox:{ emoji:'🔥☀️', statement:'This means "뜨거운".' } },
+  // Lesson 6
+  { word:'know',     kr:'알다',      sentence:'I don\'t ___ . Sorry.',   situation:'🧠💡',   ox:{ emoji:'🧠💡', statement:'This means "알다".' } },
+  { word:'where',    kr:'어디에',    sentence:'___ is my cap?',          situation:'❓🔍',   ox:{ emoji:'❓🗺️', statement:'This means "어디에".' } },
+  { word:'under',    kr:'아래에',    sentence:'It\'s ___ the chair.',    situation:'⬇️🛏️',   ox:{ emoji:'⬇️📦', statement:'This means "아래에".' } },
+  { word:'fan',      kr:'부채',      sentence:'I have a ___ . Here.',    situation:'💨🌬️',   ox:{ emoji:'💨🌀', statement:'This means "부채".' } },
+  { word:'table',    kr:'탁자',      sentence:'It\'s on the ___ .',      situation:'🍽️🪑',   ox:{ emoji:'🪵🍽️', statement:'This means "탁자".' } },
+];
+
+// ══════════════════════════════════════════════════════
+//  게임3 상태
+// ══════════════════════════════════════════════════════
+let g3questions = [], g3qi = 0, g3score3 = 0, g3combo = 0, g3answered = false;
+const QTYPES = ['fill', 'ox', 'listen'];
+
+function startGame3() {
+  showScreen('game3');
+  overlayClose('g3Result');
+  // 10문제 랜덤 구성
+  const pool = [...G3_WORDS].sort(() => Math.random() - .5).slice(0, 10);
+  g3questions = pool.map((w, i) => ({ ...w, type: QTYPES[i % 3] }))
+                    .sort(() => Math.random() - .5);
+  g3qi = 0; g3score3 = 0; g3combo = 0; g3answered = false;
+  document.getElementById('g3comboBadge').style.display = 'none';
+  renderG3();
+}
+
+function renderG3() {
+  if (g3qi >= g3questions.length) { endGame3(); return; }
+  const q = g3questions[g3qi];
+  g3answered = false;
+  document.getElementById('g3qnum').textContent    = g3qi + 1;
+  document.getElementById('g3score').textContent   = g3score3;
+  document.getElementById('g3progFill').style.width = (g3qi / g3questions.length * 100) + '%';
+  document.getElementById('g3feedback').textContent = '';
+
+  if (q.type === 'fill')   renderFill(q);
+  else if (q.type === 'ox') renderOX(q);
+  else                      renderListen(q);
+}
+
+// ── 유형1: 문장 완성 ──
+function renderFill(q) {
+  const card = document.getElementById('g3card');
+  const blanked = q.sentence.replace('___', '<span class="g3-blank">____</span>');
+  card.innerHTML = `
+    <span class="g3-type-badge g3-type-fill">💬 문장 완성</span>
+    <div class="g3-sentence">${blanked}</div>
+    <div style="font-size:.8rem;color:rgba(255,255,255,.5)">빈칸에 들어갈 단어는?</div>`;
+
+  const choices = makeChoices(q.word, 'word');
+  const area = document.getElementById('g3choiceArea');
+  area.innerHTML = '<div class="g3-choices">' +
+    choices.map(c => `<button class="g3-choice" onclick="answerFill('${c}','${q.word}',this)">${c}</button>`).join('') +
+    '</div>';
+}
+function answerFill(chosen, correct, btn) {
+  if (g3answered) return; g3answered = true;
+  const ok = chosen === correct;
+  btn.classList.add(ok ? 'correct' : 'wrong');
+  if (!ok) document.querySelectorAll('.g3-choice').forEach(b => { if (b.textContent === correct) b.classList.add('correct'); });
+  document.querySelectorAll('.g3-choice').forEach(b => b.disabled = true);
+  if (ok) {
+    const q = g3questions[g3qi];
+    const fullSentence = q.sentence.replace('___', correct);
+    setTimeout(() => speakWord(fullSentence), 200);
+  }
+  afterAnswer(ok, correct);
+}
+
+// ── 유형2: 상황 OX ──
+function renderOX(q) {
+  // 50% 확률로 맞는 단어, 50% 다른 단어 표시
+  const showCorrect = Math.random() < 0.5;
+  const shown = showCorrect ? q.word : pickOther(q.word);
+  const card = document.getElementById('g3card');
+  card.innerHTML = `
+    <span class="g3-type-badge g3-type-ox">🙆 상황 OX</span>
+    <div class="g3-situation">${q.ox.emoji}</div>
+    <div class="g3-ox-q">이 상황은 "<strong>${shown}</strong>" 인가요?</div>`;
+
+  const correct = showCorrect;
+  const area = document.getElementById('g3choiceArea');
+  area.innerHTML = `<div class="g3-ox-choices">
+    <button class="g3-ox-btn o-btn" onclick="answerOX(true,${correct},this)">O</button>
+    <button class="g3-ox-btn x-btn" onclick="answerOX(false,${correct},this)">X</button>
+  </div>`;
+  // 현재 문제의 정답 word를 발음
+  speakWord(q.word);
+}
+function answerOX(chosen, correct, btn) {
+  if (g3answered) return; g3answered = true;
+  const ok = chosen === correct;
+  btn.classList.add(ok ? 'correct' : 'wrong');
+  document.querySelectorAll('.g3-ox-btn').forEach(b => b.disabled = true);
+  afterAnswer(ok, g3questions[g3qi].word);
+}
+
+// ── 유형3: 듣고 고르기 ──
+function renderListen(q) {
+  const card = document.getElementById('g3card');
+  card.innerHTML = `
+    <span class="g3-type-badge g3-type-listen">🔊 듣고 고르기</span>
+    <div style="font-size:.9rem;color:rgba(255,255,255,.6);margin-bottom:4px">발음을 듣고 한국어 뜻을 고르세요!</div>
+    <button class="g3-listen-btn" onclick="speakWord('${q.word}')">🔊</button>`;
+  speakWord(q.word);
+
+  const choices = makeChoices(q.kr, 'kr');
+  const area = document.getElementById('g3choiceArea');
+  area.innerHTML = '<div class="g3-choices">' +
+    choices.map(c => `<button class="g3-choice" onclick="answerListen('${c.replace(/'/g,"\\'")}','${q.kr.replace(/'/g,"\\'")}',this)">${c}</button>`).join('') +
+    '</div>';
+}
+function answerListen(chosen, correct, btn) {
+  if (g3answered) return; g3answered = true;
+  const ok = chosen === correct;
+  btn.classList.add(ok ? 'correct' : 'wrong');
+  if (!ok) document.querySelectorAll('.g3-choice').forEach(b => { if (b.textContent === correct) b.classList.add('correct'); });
+  document.querySelectorAll('.g3-choice').forEach(b => b.disabled = true);
+  afterAnswer(ok, g3questions[g3qi].word);
+}
+
+// ── 공통 후처리 ──
+function afterAnswer(ok, word) {
+  const fb = document.getElementById('g3feedback');
+  if (ok) {
+    g3combo++;
+    const bonus = g3combo >= 3 ? g3combo : 0;
+    g3score3 += 10 + bonus * 2;
+    document.getElementById('g3score').textContent = g3score3;
+    fb.textContent = g3combo >= 3
+      ? `🔥 ${g3combo}콤보! +${10 + bonus * 2}점`
+      : `✅ 정답! +10점`;
+    fb.style.color = '#ffd700';
+    if (g3combo >= 2) {
+      document.getElementById('g3comboBadge').style.display = '';
+      document.getElementById('g3combo').textContent = g3combo;
+    }
+  } else {
+    g3combo = 0;
+    document.getElementById('g3comboBadge').style.display = 'none';
+    const q = g3questions[g3qi];
+    fb.textContent = `❌ 정답: ${word} = ${q.kr}`;
+    fb.style.color = '#fca5a5';
+  }
+  g3qi++;
+  setTimeout(renderG3, 1400);
+}
+
+// ── 헬퍼 ──
+function makeChoices(correct, field) {
+  const others = G3_WORDS.filter(w => w[field] !== correct)
+    .sort(() => Math.random() - .5).slice(0, 3).map(w => w[field]);
+  return [correct, ...others].sort(() => Math.random() - .5);
+}
+function pickOther(word) {
+  const others = G3_WORDS.filter(w => w.word !== word);
+  return others[Math.floor(Math.random() * others.length)].word;
+}
+
+function endGame3() {
+  document.getElementById('g3progFill').style.width = '100%';
+  const earned = Math.floor(g3score3 / 10);
+  addStrawberry(earned);
+  const perfect = g3score3 >= 100;
+  document.getElementById('g3ResultTitle').textContent = perfect ? '🌟 완벽해요!' : '🎉 수고했어요!';
+  document.getElementById('g3ResultMsg').textContent   = `${g3score3}점을 받았어요!`;
+  document.getElementById('g3Earned').textContent      = earned > 0
+    ? `🍓 ${earned}개 획득!\n현재 보유: ${strawberries}개`
+    : '조금 더 연습하면 딸기를 얻을 수 있어요!';
+  setTimeout(() => overlayShow('g3Result'), 400);
+}
+</script>
+</body>
+</html>
